@@ -1,0 +1,5 @@
+RewriteEngine On
+
+# Only allow images if embedded in galery.php
+RewriteCond %{HTTP_REFERER} !^https?://(www\.)?osis-medcom\.web\.id/galery/galery\.php(\?.*)?$ [NC]
+RewriteRule \.(jpg|jpeg|png|gif|webp)$ - [NC,F,L]

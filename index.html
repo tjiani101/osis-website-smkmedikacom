@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSIS & MPK - SMK MEDIKACOM | Liquid Glass</title>
+    
+    <!-- Meta OG Tags -->
+    <meta property="og:title" content="Website Resmi OSIS & MPK Medikacom" />
+    <meta property="og:description" content="Halaman Utama dari Website Resmi OSIS & MPK Medikacom" />
+    <meta property="og:image" content="images/logo.png" />
+    <meta property="og:url" content="https://osis-medcom.web.id/" />
+    <meta property="og:type" content="website" />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Plus Jakarta Sans for modern, rounded typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Animate On Scroll (AOS) Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <style>
+        /* --- Base & Typography --- */
+        :root {
+            --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.05));
+            --glass-border: 1px solid rgba(255, 255, 255, 0.3);
+            --glass-border-top: 1px solid rgba(255, 255, 255, 0.6);
+            --glass-border-left: 1px solid rgba(255, 255, 255, 0.6);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15), inset 0 2px 3px rgba(255, 255, 255, 0.6), inset 0 -2px 5px rgba(0, 0, 0, 0.1);
+            --glass-radius: 28px;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #05050f;
+            color: #ffffff;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- Blurred Image Background --- */
+        .main-background {
+            position: fixed;
+            top: -5%;
+            left: -5%;
+            width: 110vw;
+            height: 110vh;
+            z-index: -2;
+            background-image: url('DSC06963.webp');
+            background-size: cover;
+            background-position: center;
+            filter: blur(12px) brightness(0.4);
+        }
+
+        /* --- Mandatory Liquid Glass Component --- */
+        .liquid-glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(120%);
+            -webkit-backdrop-filter: blur(16px) saturate(120%);
+            box-shadow: var(--glass-shadow);
+            border: var(--glass-border);
+            border-top: var(--glass-border-top);
+            border-left: var(--glass-border-left);
+            border-radius: var(--glass-radius);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .liquid-glass-interactive {
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .liquid-glass-interactive:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px 0 rgba(0, 0, 0, 0.25), 
+                        inset 0 4px 6px rgba(255, 255, 255, 0.7), 
+                        inset 0 -2px 5px rgba(0, 0, 0, 0.1),
+                        0 0 20px rgba(255,255,255,0.15);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.08));
+        }
+
+        /* --- Liquid Buttons --- */
+        .liquid-btn {
+            background: rgba(37, 99, 235, 0.8);
+            backdrop-filter: blur(10px) saturate(150%);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2), 
+                        inset 0 2px 3px rgba(255, 255, 255, 0.4), 
+                        inset 0 -2px 4px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.4);
+            border-top: 1px solid rgba(255,255,255,0.7);
+            border-radius: 999px;
+            color: white;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .liquid-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4), 
+                        inset 0 3px 5px rgba(255, 255, 255, 0.8), 
+                        inset 0 -2px 4px rgba(0,0,0,0.2);
+            background: rgba(37, 99, 235, 1);
+        }
+
+        /* --- Text Gradients & Hierarchy --- */
+        h1, h2, h3 { font-weight: 800; letter-spacing: -0.02em; text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        p { font-weight: 400; color: rgba(255, 255, 255, 0.8); line-height: 1.7; }
+        
+        .text-gradient {
+            background: linear-gradient(to right, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* --- AI Chat Styles --- */
+        .chat-container-glass {
+            background: rgba(0,0,0,0.1);
+            border-radius: 20px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .chat-bubble { max-width: 85%; padding: 1rem 1.5rem; border-radius: 20px; word-wrap: break-word; line-height: 1.6; font-size: 0.95rem; }
+        .chat-bubble.user { 
+            background: linear-gradient(135deg, #2563eb, #4f46e5); 
+            color: white; border-bottom-right-radius: 4px; 
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3), inset 0 2px 2px rgba(255,255,255,0.3);
+        }
+        .chat-bubble.ai { 
+            background: rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(10px);
+            color: #f3f4f6; border-bottom-left-radius: 4px; 
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1), inset 0 2px 2px rgba(255,255,255,0.1);
+        }
+        
+        /* Chat Input Liquid Glass */
+        .liquid-input {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.4);
+            border-left: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .liquid-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.6);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 0 15px rgba(255,255,255,0.1);
+        }
+
+        /* --- Dot Flashing --- */
+        .dot-flashing { position: relative; width: 8px; height: 8px; border-radius: 5px; color: #fdfdfd; animation: dotFlashing 1s infinite linear alternate; animation-delay: .5s; }
+        .dot-flashing::before, .dot-flashing::after { content: ''; display: inline-block; position: absolute; top: 0; }
+        .dot-flashing::before { left: -12px; width: 8px; height: 8px; border-radius: 5px; background-color: #ffffff; animation: dotFlashing 1s infinite alternate; animation-delay: 0s; }
+        .dot-flashing::after { left: 12px; width: 8px; height: 8px; border-radius: 5px; background-color: #ffffff; animation: dotFlashing 1s infinite alternate; animation-delay: 1s; }
+        @keyframes dotFlashing { 0% { background-color: #ffffff; } 50%, 100% { background-color: rgba(255, 255, 255, 0.3); } }
+
+        /* --- Timeline (Struktur) --- */
+        .timeline-container { border-left: 2px solid rgba(255,255,255,0.2); }
+        .timeline-item::before { 
+            content: ''; position: absolute; left: -0.65rem; top: 0.7rem; 
+            width: 1.2rem; height: 1.2rem; border-radius: 50%; 
+            background: linear-gradient(135deg, #60a5fa, #c084fc); 
+            box-shadow: 0 0 10px rgba(96, 165, 250, 0.8), inset 0 2px 2px rgba(255,255,255,0.8);
+        }
+        
+        /* --- FAQ Accordion --- */
+        .faq-question svg { transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .faq-item.open .faq-question svg { transform: rotate(180deg); }
+        .faq-answer { max-height: 0; overflow: hidden; transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1); opacity: 0; }
+        .faq-item.open .faq-answer { max-height: 300px; padding-top: 1.25rem; opacity: 1; }
+
+        /* --- Loading Spinner --- */
+        .loader { 
+            border: 4px solid rgba(255, 255, 255, 0.1); 
+            border-left-color: #ffffff; 
+            border-radius: 50%; width: 50px; height: 50px; 
+            animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; 
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Custom Scrollbar for Chat */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
+
+    </style>
+</head>
+<body class="antialiased selection:bg-purple-500/30 selection:text-white">
+    
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-[#05050f] z-[100] flex flex-col items-center justify-center transition-opacity duration-700">
+        <div class="loader mb-4"></div>
+        <p class="text-white/70 font-medium tracking-widest text-sm uppercase">Memuat Mahakarya</p>
+    </div>
+
+    <!-- Background Elements -->
+    <div class="main-background"></div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="opacity-0 transition-opacity duration-1000 relative z-10">
+        
+        <!-- Header & Navbar -->
+        <header id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-400 pt-4 px-4 md:px-8">
+            <nav class="max-w-7xl mx-auto">
+                <div class="flex items-center justify-between liquid-glass px-6 py-3 md:py-4">
+                    <a href="#" class="flex shrink-0 items-center group">
+                        <div class="p-2 bg-white/10 rounded-xl mr-3 border border-white/20 group-hover:bg-white/20 transition-colors">
+                            <img class="h-8 w-auto drop-shadow-md" src="images/logo.png" alt="Logo OSIS MPK" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ffffff/000000?text=Logo';"> 
+                        </div>
+                        <span class="text-white text-sm md:text-base font-bold leading-tight tracking-wide">
+                            OSIS & MPK<br><span class="text-white/70 font-medium text-xs">SMK MEDIKACOM</span>
+                        </span>
+                    </a>
+                    
+                    <!-- Desktop Menu -->
+                    <div class="hidden md:flex items-center space-x-1 lg:space-x-2">
+                        <a href="#ai-assistant" class="px-4 py-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-all font-medium text-sm">Asisten AI</a>
+                        <a href="#sambutan" class="px-4 py-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-all font-medium text-sm">Sambutan</a>
+                        <a href="#struktur" class="px-4 py-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-all font-medium text-sm">Struktur</a>
+                        <a href="/gallery" class="px-4 py-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-all font-medium text-sm">Gallery</a>
+                        <a href="#faq" class="px-4 py-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-all font-medium text-sm">FAQ</a>
+                    </div>
+                    
+                    <a href="pages/forum/" class="hidden md:block liquid-btn px-6 py-2.5 text-sm font-bold tracking-wide">
+                        Masuk Forum
+                    </a>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-button" class="md:hidden p-2 rounded-xl bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+                    </button>
+                </div>
+            </nav>
+            
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="hidden md:hidden max-w-7xl mx-auto mt-2 transition-all">
+                <div class="liquid-glass p-4 flex flex-col space-y-2 text-center">
+                    <a href="#ai-assistant" class="mobile-menu-link text-white/80 hover:text-white hover:bg-white/10 rounded-xl py-3 font-medium">Asisten AI</a>
+                    <a href="#sambutan" class="mobile-menu-link text-white/80 hover:text-white hover:bg-white/10 rounded-xl py-3 font-medium">Sambutan</a>
+                    <a href="#struktur" class="mobile-menu-link text-white/80 hover:text-white hover:bg-white/10 rounded-xl py-3 font-medium">Struktur</a>
+                    <a href="/gallery" class="mobile-menu-link text-white/80 hover:text-white hover:bg-white/10 rounded-xl py-3 font-medium">Galeri</a>
+                    <a href="#pricing" class="mobile-menu-link text-white/80 hover:text-white hover:bg-white/10 rounded-xl py-3 font-medium">Pricing</a>
+                    <a href="#faq" class="mobile-menu-link text-white/80 hover:text-white hover:bg-white/10 rounded-xl py-3 font-medium">FAQ</a>
+                    <div class="pt-2">
+                        <a href="pages/forum/" class="mobile-menu-link liquid-btn block w-full py-3 font-bold">Forum</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="container mx-auto px-4 md:px-8 max-w-7xl pt-32 pb-16">
+            
+            <!-- Hero Section -->
+            <section id="home" class="min-h-[80vh] flex flex-col items-center justify-center text-center py-12 relative">
+                <div class="space-y-8 max-w-5xl z-10">
+                    <div data-aos="fade-down" data-aos-duration="1000" class="inline-block px-4 py-1.5 rounded-full border border-white/20 bg-white/5 backdrop-blur-md text-sm font-medium text-white/80 mb-4">
+                        Web Resmi SMK/MPK Medikacom
+                    </div>
+                    <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight text-white" data-aos="zoom-in-up" data-aos-duration="1200">
+                        Those who are crazy enough <br class="hidden sm:block">
+                        <span class="text-gradient">to think they can change the world</span> <br class="hidden sm:block">
+                        usually do.
+                    </h1>
+                    <p class="text-lg md:text-xl text-white/80 max-w-2xl mx-auto font-medium" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1000">
+                        Steve Jobs' famous 1997 Apple "Think Different" campaign.
+                    </p>
+                    <div data-aos="fade-up" data-aos-delay="400" data-aos-duration="1000" class="pt-4">
+                         <a href="daftar_eskul/" class="liquid-btn px-10 py-4 text-lg font-bold inline-flex items-center gap-2 group">
+                            Daftar Ekstrakurikuler!
+                            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </a>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- AI Assistant Section -->
+            <section id="ai-assistant" class="py-20 md:py-28 relative">
+                <div class="text-center mb-12" data-aos="fade-up">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-4">Asisten AI OSIS & MPK</h2>
+                    <center>
+                    
+                    <div class="flex justify-center">
+                        <div class="inline-flex items-center bg-black/20 px-4 py-2 rounded-full border border-white/5">
+                            <span class="w-2 h-2 rounded-full bg-green-400 mr-2 animate-pulse"></span>
+                            Powered By <strong class="text-white ml-1">Minex</strong>
+                        </div>
+                    </div>
+                        
+                    </center>
+                    <p class="text-white/80 max-w-2xl mx-auto text-lg">
+                        Punya pertanyaan tentang OSIS, MPK, atau event sekolah? Tanyakan langsung di sini!
+                    </p>
+                </div>
+                
+                <div data-aos="zoom-in" data-aos-delay="100">
+                    <div class="liquid-glass max-w-4xl mx-auto p-6 sm:p-10 text-left">
+                        <!-- Chat Display -->
+                        <div id="ai-chat-container" class="chat-container-glass h-[400px] overflow-y-auto p-6 space-y-6 mb-8 scroll-smooth border border-white/10">
+                            <div class="flex justify-start">
+                                <div class="chat-bubble ai">
+                                    Halo! Saya adalah Asisten AI dari <strong>Minex Digital</strong>. Ada yang bisa saya bantu seputar OSIS & MPK SMK Medikacom?
+                                </div>
+                            </div>
+                            <!-- Chat messages will be injected here -->
+                        </div>
+                        
+                        <!-- Chat Input Form -->
+                        <form id="ai-chat-form" class="flex flex-col sm:flex-row gap-4 relative">
+                            <input type="text" id="ai-chat-input" placeholder="Ketik pertanyaanmu di sini..." class="liquid-input flex-grow rounded-2xl px-6 py-4 text-base transition-all w-full placeholder-white/50" required>
+                            <button type="submit" id="ai-chat-submit" class="liquid-btn px-8 py-4 font-bold flex items-center justify-center w-full sm:w-auto rounded-2xl">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                                Kirim
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sambutan Section -->
+            <section id="sambutan" class="py-20 md:py-28">
+                <div class="text-center mb-16" data-aos="fade-up">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-4">Kenapa Mereka Ikut OSIS?</h2>
+                    <p class="text-white/70 text-lg max-w-2xl mx-auto">Dengarkan langsung dari para anggota.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+                    <!-- Testimonial 1 -->
+                    <div class="liquid-glass liquid-glass-interactive p-8 md:p-10 flex flex-col h-full" data-aos="fade-up" data-aos-delay="100">
+                        <div class="text-4xl text-blue-400/50 mb-4 font-serif">"</div>
+                        <p class="text-white/80 mb-8 flex-grow text-lg leading-relaxed">Saya ingin mencari pengalaman baru dalam berorganisasi, memperluas relasi, dan memberikan kontribusi positif bagi sekolah. Pengalaman di OSIS akan sangat membantu untuk jenjang kuliah nanti.</p>
+                        <div class="mt-auto border-t border-white/10 pt-6">
+                            <h4 class="text-xl font-bold text-white">Null</h4>
+                            <p class="text-blue-300 text-sm font-medium">Null</p>
+                        </div>
+                    </div>
+                    <!-- Testimonial 2 -->
+                    <div class="liquid-glass liquid-glass-interactive p-8 md:p-10 flex flex-col h-full relative overflow-hidden" data-aos="fade-up" data-aos-delay="200">
+                        <!-- Subtle highlight background for center card -->
+                        <div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent pointer-events-none"></div>
+                        <div class="text-4xl text-purple-400/50 mb-4 font-serif">"</div>
+                        <p class="text-white/80 mb-8 flex-grow text-lg leading-relaxed">Aku join OSIS karena memang dari SMP sudah aktif. Selain menambah pengalaman, aku juga ingin menambah koneksi, relasi, dan belajar bekerja bersama tim. Di OSIS, setiap ide kecil bisa jadi besar!</p>
+                        <div class="mt-auto border-t border-white/10 pt-6">
+                            <h4 class="text-xl font-bold text-white">Tjiani</h4>
+                            <p class="text-purple-300 text-sm font-medium">Web Developer - TKJ XI A</p>
+                        </div>
+                    </div>
+                    <!-- Testimonial 3 -->
+                    <div class="liquid-glass liquid-glass-interactive p-8 md:p-10 flex flex-col h-full" data-aos="fade-up" data-aos-delay="300">
+                        <div class="text-4xl text-pink-400/50 mb-4 font-serif">"</div>
+                        <p class="text-white/80 mb-8 flex-grow text-lg leading-relaxed">Menjadi bagian dari OSIS membuka kesempatan untuk belajar kepemimpinan secara langsung, mengelola acara, dan bekerja sama dalam tim untuk mewujudkan ide-ide kreatif menjadi nyata.</p>
+                        <div class="mt-auto border-t border-white/10 pt-6">
+                            <h4 class="text-xl font-bold text-white">Null</h4>
+                            <p class="text-pink-300 text-sm font-medium">Null</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Struktur Section -->
+            <section id="struktur" class="py-20 md:py-28">
+                <div class="text-center mb-16" data-aos="fade-up">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-4">Struktur Inti OSIS & MPK</h2>
+                    <p class="text-white/70 text-lg max-w-2xl mx-auto bg-white/5 inline-block px-4 py-1 rounded-full border border-white/10">Periode 2025-2026</p>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div data-aos="fade-right">
+                        <div class="liquid-glass p-8 md:p-12">
+                            <div class="relative timeline-container pl-8 space-y-10">
+                                <!-- Timeline Item 1 -->
+                                <div class="timeline-item relative group">
+                                    <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-blue-300 transition-colors"><br> Pembina & Penanggung Jawab</h3>
+                                    <div class="space-y-2 text-white/70 font-medium">
+                                        <p>Iis Ismawati, S.Kom., M.Kom <span class="text-white/40 text-sm ml-2">(Kepala Sekolah)</span></p>
+                                        <p>Rani Nurhayati, S.Pd., M.M. <span class="text-white/40 text-sm ml-2">(Wakasek Kesiswaan)</span></p>
+                                        <p>Diah Trisnamayanti, S.S <span class="text-white/40 text-sm ml-2">(Pembina OSIS)</span></p>
+                                    </div>
+                                </div>
+                                <!-- Timeline Item 2 -->
+                                <div class="timeline-item relative group">
+                                    <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-purple-300 transition-colors"><br>Ketua & Wakil Ketua OSIS</h3>
+                                    <div class="space-y-2 text-white/70 font-medium">
+                                        <p>Fadli <span class="text-white/40 text-sm ml-2">(Ketua)</span></p>
+                                        <p>Davira <span class="text-white/40 text-sm ml-2">(Wakil Ketua)</span></p>
+                                    </div>
+                                </div>
+                                <!-- Timeline Item 3 -->
+                                <div class="timeline-item relative group">
+                                    <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-pink-300 transition-colors"><br>Ketua & Wakil Ketua MPK</h3>
+                                    <div class="space-y-2 text-white/70 font-medium">
+                                        <p>Abraham <span class="text-white/40 text-sm ml-2">(Ketua)</span></p>
+                                        <p>Malika <span class="text-white/40 text-sm ml-2">(Wakil Ketua)</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div data-aos="fade-left" data-aos-delay="200" class="relative group">
+                        <div class="liquid-glass p-2 relative">
+                            <img src="images/osisall.webp" alt="Foto Bersama Anggota OSIS" class="rounded-[24px] w-full h-auto object-cover" onerror="this.onerror=null;this.src='https://placehold.co/600x800/0a183d/ffffff?text=Gambar+OSIS';">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gallery Section -->
+            <section id="gallery" class="py-20 md:py-28">
+                <div class="text-center mb-16" data-aos="fade-up">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-4">Galeri Kegiatan</h2>
+                    <p class="text-white/70 text-lg">Momen-momen tak terlupakan kami.</p>
+                </div>
+                
+                <div class="liquid-glass max-w-6xl mx-auto p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-3 gap-8" data-aos="zoom-in">
+                    <!-- Image Display -->
+                    <div class="lg:col-span-2 w-full h-72 sm:h-[500px] rounded-3xl overflow-hidden relative shadow-inner border border-white/10">
+                        <div class="absolute inset-0 bg-black/20 flex items-center justify-center" id="gallery-loader">
+                            <div class="loader !w-8 !h-8 !border-2"></div>
+                        </div>
+                        <img src="images/gallery/1.png" alt="Galeri Kegiatan OSIS" id="gallery-image" class="w-full h-full object-cover transition-all duration-700 relative z-10" onerror="this.onerror=null;this.src='https://placehold.co/800x600/080a1a/ffffff?text=Pilih+Galeri+di+Samping'; document.getElementById('gallery-loader').style.display='none';">
+                    </div>
+                    <!-- Activity List -->
+                    <div class="flex flex-col justify-center h-full">
+                        <ul id="gallery-list" class="space-y-4">
+                            <li class="gallery-item p-5 rounded-2xl text-lg cursor-pointer transition-all duration-400 bg-white/5 border border-white/10 hover:bg-white/10 font-semibold active" data-image="images/gallery/1.png">Pelepasan Kelas 12</li>
+                            <li class="gallery-item p-5 rounded-2xl text-lg cursor-pointer transition-all duration-400 bg-white/5 border border-white/10 hover:bg-white/10 font-semibold" data-image="images/gallery/3.png">Kolaborasi OSIS 18 & 19</li>
+                            <li class="gallery-item p-5 rounded-2xl text-lg cursor-pointer transition-all duration-400 bg-white/5 border border-white/10 hover:bg-white/10 font-semibold" data-image="images/gallery/2.png">Pekan Olahraga & Seni</li>
+                            <li class="gallery-item p-5 rounded-2xl text-lg cursor-pointer transition-all duration-400 bg-white/5 border border-white/10 hover:bg-white/10 font-semibold" data-image="images/slider/IMG_6424.jpg">Ladies</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Pricing Section -->
+            <section id="pricing" class="py-20 md:py-28 relative">
+                <div class="text-center mb-16" data-aos="fade-up">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-4 uppercase tracking-tight">Tier Contributor Untuk Kamu!</h2>
+                    <p class="text-white/70 text-lg max-w-2xl mx-auto">Dapatkan seluruh fasilitasnya Selamanya!</p>
+                </div>
+                
+                <div class="flex justify-center" data-aos="zoom-in-up" data-aos-delay="200">
+                    <div class="liquid-glass liquid-glass-interactive p-10 md:p-14 w-full max-w-md text-center relative overflow-hidden">
+                        <!-- Shine effect on card -->
+                        <div class="absolute top-0 left-[-100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[45deg] transition-all duration-700 hover:left-[200%] pointer-events-none"></div>
+                        
+                        <h3 class="text-2xl font-bold mb-2 text-white">Forum/Gallery<br>Contributor Tier</h3>
+                        <div class="flex justify-center items-start mt-6 mb-8">
+                            <span class="text-2xl font-bold text-white/50 mt-2 mr-1">Rp</span>
+                            <span class="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300">15.000</span>
+                        </div>
+                        
+                        <div class="bg-white/5 rounded-xl p-4 mb-8 border border-white/10">
+                            <p class="text-white/80 text-sm font-medium">Benefit & Harga bisa bertambah kapan saja. Update Benefit GRATIS! Khusus Member</p>
+                        </div>
+                        
+                        <ul class="space-y-5 text-left mb-10">
+                            <li class="flex items-start"><svg class="w-6 h-6 text-blue-400 mr-3 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg><span class="text-white/90">Akses Semua Foto-Foto Premium</span></li>
+                            <li class="flex items-start"><svg class="w-6 h-6 text-blue-400 mr-3 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg><span class="text-white/90">Download Foto-Foto dengan Kualitas tertinggi</span></li>
+                            <li class="flex items-start"><svg class="w-6 h-6 text-blue-400 mr-3 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg><span class="text-white/90">Akses Ke File Raw Super High Resolution GRATIS</span></li>
+                            <li class="flex items-start"><svg class="w-6 h-6 text-blue-400 mr-3 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg><span class="text-white/90">Komunitas High-Level & Supportif, Dikelilingi Orang Serius Naik Kelas</span></li>
+                            <li class="flex items-start"><svg class="w-6 h-6 text-purple-400 mr-3 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span class="text-white/70 italic text-sm mt-0.5">Coming soon: 100GB dan 1TB+ bandwith (untuk 3 bulan pertama) Cloud Drive SEMUANYA GRATIS</span></li>
+                        </ul>
+                        <a href="#" class="liquid-btn w-full block py-4 text-lg font-bold rounded-2xl">
+                            Dapatkan Akses Sekarang 
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FAQ Section -->
+            <section id="faq" class="py-20 md:py-28">
+                <div class="text-center mb-16" data-aos="fade-up">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-4">Frequently Asked Questions</h2>
+                    <p class="text-white/70 text-lg">Jawaban atas pertanyaan umum.</p>
+                </div>
+                
+                <div class="max-w-3xl mx-auto space-y-5" data-aos="fade-up" data-aos-delay="100">
+                    <!-- FAQ Item 1 -->
+                    <div class="faq-item liquid-glass p-1">
+                        <button class="faq-question w-full flex justify-between items-center text-left text-lg font-bold p-5 rounded-2xl hover:bg-white/5 transition-colors">
+                            <span>Bagaimana cara mendaftar menjadi anggota OSIS?</span>
+                            <div class="bg-white/10 p-2 rounded-full"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                        </button>
+                        <div class="faq-answer text-white/80 px-6 pb-2">
+                            <p class="pb-5">Pendaftaran anggota OSIS biasanya dibuka setiap awal tahun ajaran baru. Pantau terus informasi di website ini atau media sosial kami untuk pengumuman resmi. Prosesnya meliputi pengisian formulir, seleksi berkas, dan wawancara.</p>
+                        </div>
+                    </div>
+                    <!-- FAQ Item 2 -->
+                    <div class="faq-item liquid-glass p-1">
+                        <button class="faq-question w-full flex justify-between items-center text-left text-lg font-bold p-5 rounded-2xl hover:bg-white/5 transition-colors">
+                            <span>Apa saja kegiatan utama OSIS dalam setahun?</span>
+                            <div class="bg-white/10 p-2 rounded-full"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                        </button>
+                        <div class="faq-answer text-white/80 px-6 pb-2">
+                            <p class="pb-5">Kegiatan kami sangat beragam, mulai dari Masa Pengenalan Lingkungan Sekolah (MPLS) untuk siswa baru, Pekan Olahraga dan Seni (Porseni), perayaan hari besar nasional, seminar, workshop, hingga bakti sosial.</p>
+                        </div>
+                    </div>
+                    <!-- FAQ Item 3 -->
+                    <div class="faq-item liquid-glass p-1">
+                        <button class="faq-question w-full flex justify-between items-center text-left text-lg font-bold p-5 rounded-2xl hover:bg-white/5 transition-colors">
+                            <span>Apakah siswa dari semua jurusan bisa bergabung?</span>
+                            <div class="bg-white/10 p-2 rounded-full"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                        </button>
+                        <div class="faq-answer text-white/80 px-6 pb-2">
+                            <p class="pb-5">Tentu saja! OSIS & MPK terbuka untuk semua siswa aktif SMK Medikacom dari seluruh program keahlian. Kami percaya keberagaman jurusan justru akan memperkaya ide dan kolaborasi dalam organisasi.</p>
+                        </div>
+                    </div>
+                    <!-- FAQ Item 4 -->
+                    <div class="faq-item liquid-glass p-1">
+                        <button class="faq-question w-full flex justify-between items-center text-left text-lg font-bold p-5 rounded-2xl hover:bg-white/5 transition-colors">
+                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300">WEB INFORMATION</span>
+                            <div class="bg-white/10 p-2 rounded-full"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                        </button>
+                        <div class="faq-answer text-white/80 px-6 pb-2">
+                            <div class="pb-5 space-y-2 font-mono text-sm bg-black/20 p-4 rounded-xl border border-white/5">
+                                <p class="text-blue-300 font-bold">77% complete,</p>
+                                <p>Home Version: <span class="text-white">3.7.7</span></p>
+                                <p>Forum Version: <span class="text-white">5.1.1</span></p>
+                                <p>Security Version: <span class="text-white">27.2.2</span></p>
+                                <p class="pt-2 text-white/50 text-xs">Last Updated: 01:00AM 2025/07/12</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-10">
+            <div class="container mx-auto px-4 md:px-8 pb-8 max-w-7xl">
+                <div class="liquid-glass p-10 md:p-14 rounded-b-[40px] rounded-t-[40px]">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-12 text-center md:text-left">
+                        <div class="md:col-span-5">
+                            <h3 class="text-2xl font-extrabold mb-4 text-white flex items-center justify-center md:justify-start">
+                                <img class="h-8 w-auto mr-3" src="images/logo.png" alt="Logo" onerror="this.style.display='none'">
+                                OSIS & MPK MEDIKACOM
+                            </h3>
+                            <p class="text-white/70 leading-relaxed mb-4">Jl. Rancabolang – Soekarno Hatta, No. 10B, Bandung – Jawa Barat</p>
+                            <a href="mailto:mail@osis-medcom.web.id" class="inline-flex items-center text-blue-300 hover:text-white transition-colors font-medium">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                mail@osis-medcom.web.id
+                            </a>
+                        </div>
+                        
+                        <div class="md:col-span-4 flex flex-col items-center md:items-start">
+                            <h3 class="text-xl font-bold mb-6 text-white">Tautan Penting</h3>
+                            <ul class="space-y-3 text-white/70 font-medium">
+                                <li><a href="#home" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Beranda</a></li>
+                                <li><a href="#struktur" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Struktur Organisasi</a></li>
+                                <li><a href="#gallery" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Galeri Kegiatan</a></li>
+                                <li><a href="pages/forum/" class="text-blue-300 hover:text-white hover:translate-x-1 inline-block transition-transform">Forum Diskusi</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="md:col-span-3 flex flex-col items-center md:items-start">
+                            <h3 class="text-xl font-bold mb-6 text-white">Ikuti Kami</h3>
+                            <div class="flex justify-center md:justify-start space-x-4">
+                                <a href="#" class="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/80 hover:bg-white/20 hover:text-white hover:scale-110 transition-all shadow-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919A48.904 48.904 0 0 1 12 2.163m0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zM12 16c-2.209 0-4-1.791-4-4s1.791-4 4-4 4 1.791 4 4-1.791 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44s-1.44-.645-1.44-1.44.646-1.44 1.44-1.44 1.44.645 1.44 1.44z"/></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-white/50 text-sm font-medium gap-4">
+                        <div>
+                            &copy; <span id="year"></span> osis-medcom.web.id. All Rights Reserved. <br class="md:hidden">
+                            <span class="hidden md:inline">|</span> Terms & Privacy Policy
+                        </div>
+                        <div class="bg-black/20 px-4 py-2 rounded-full border border-white/5 flex items-center">
+                            <span class="w-2 h-2 rounded-full bg-green-400 mr-2 animate-pulse"></span>
+                            Powered By <strong class="text-white ml-1">Minex</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Page Load & Init AOS ---
+            const loadingScreen = document.getElementById('loading-screen');
+            const mainContent = document.getElementById('main-content');
+            
+            window.onload = () => {
+                loadingScreen.classList.add('opacity-0');
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    mainContent.classList.remove('opacity-0');
+                    AOS.init({ duration: 800, once: true, offset: 50, easing: 'ease-out-cubic' });
+                }, 700);
+            };
+
+            // --- Navbar Logic ---
+            const navbar = document.getElementById('navbar');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuLinks = document.querySelectorAll('.mobile-menu-link');
+
+            window.addEventListener('scroll', () => {
+                if(window.scrollY > 50) {
+                    navbar.classList.add('py-2', 'backdrop-blur-md', 'bg-black/20');
+                    navbar.classList.remove('pt-4');
+                } else {
+                    navbar.classList.remove('py-2', 'backdrop-blur-md', 'bg-black/20');
+                    navbar.classList.add('pt-4');
+                }
+            });
+
+            mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+            mobileMenuLinks.forEach(link => link.addEventListener('click', () => mobileMenu.classList.add('hidden')));
+
+            // --- Interactive Gallery Logic ---
+            const galleryListItems = document.querySelectorAll('.gallery-item');
+            const galleryImage = document.getElementById('gallery-image');
+            const galleryLoader = document.getElementById('gallery-loader');
+            
+            // Custom active classes for Liquid Glass theme
+            const activeClasses = ['bg-white/20', 'border-white/40', 'text-white', 'shadow-lg', 'scale-[1.02]', 'active'];
+
+            galleryListItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    // Start transition
+                    galleryImage.style.opacity = 0;
+                    if(galleryLoader) galleryLoader.style.display = 'flex';
+                    
+                    setTimeout(() => {
+                        galleryImage.src = item.dataset.image;
+                        galleryImage.onload = () => {
+                            galleryImage.style.opacity = 1;
+                            if(galleryLoader) galleryLoader.style.display = 'none';
+                        };
+                        // Fallback if image fails
+                        galleryImage.onerror = () => {
+                            galleryImage.style.opacity = 1;
+                            if(galleryLoader) galleryLoader.style.display = 'none';
+                        }
+                    }, 400);
+
+                    // Update active state in list
+                    document.querySelectorAll('.gallery-item').forEach(el => {
+                        activeClasses.forEach(cls => el.classList.remove(cls));
+                    });
+                    activeClasses.forEach(cls => item.classList.add(cls));
+                });
+            });
+
+            // Initialize gallery list styling based on default 'active' class
+            document.querySelector('.gallery-item.active').classList.add(...activeClasses.filter(c => c !== 'active'));
+
+            // --- FAQ Accordion Logic ---
+            const faqItems = document.querySelectorAll('.faq-item');
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question');
+                question.addEventListener('click', () => {
+                    const currentlyOpen = document.querySelector('.faq-item.open');
+                    if (currentlyOpen && currentlyOpen !== item) {
+                        currentlyOpen.classList.remove('open');
+                        currentlyOpen.querySelector('.faq-question').classList.remove('bg-white/5');
+                    }
+                    item.classList.toggle('open');
+                    if(item.classList.contains('open')){
+                        question.classList.add('bg-white/5');
+                    } else {
+                        question.classList.remove('bg-white/5');
+                    }
+                });
+            });
+
+            // --- Footer Year ---
+            document.getElementById('year').textContent = new Date().getFullYear();
+
+            // --- AI Assistant Logic ---
+            const aiChatForm = document.getElementById('ai-chat-form');
+            const aiChatInput = document.getElementById('ai-chat-input');
+            const aiChatContainer = document.getElementById('ai-chat-container');
+            const aiChatSubmit = document.getElementById('ai-chat-submit');
+
+            const addMessageToChat = (text, sender) => {
+                const messageWrapper = document.createElement('div');
+                messageWrapper.className = `flex w-full ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
+                const messageBubble = document.createElement('div');
+                messageBubble.className = `chat-bubble ${sender}`;
+                messageBubble.innerHTML = sender === 'loading' ? `<div class="dot-flashing"></div>` : text.replace(/\n/g, '<br>');
+                messageWrapper.appendChild(messageBubble);
+                aiChatContainer.appendChild(messageWrapper);
+                aiChatContainer.scrollTop = aiChatContainer.scrollHeight;
+                return messageWrapper;
+            }
+
+            aiChatForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const userInput = aiChatInput.value.trim();
+                if (!userInput || aiChatSubmit.disabled) return;
+
+                addMessageToChat(userInput, 'user');
+                aiChatInput.value = '';
+                aiChatSubmit.disabled = true;
+                aiChatSubmit.classList.add('opacity-50', 'cursor-not-allowed');
+                
+                const loadingBubble = addMessageToChat('', 'loading');
+
+                try {
+                    const prompt = `Anda adalah asisten AI dari Minex Digital yang ramah, sopan, dan sangat informatif untuk OSIS & MPK SMK Medikacom Bandung. Peran Anda adalah menjadi penghubung digital yang menjawab berbagai pertanyaan dari siswa aktif, calon siswa, alumni, maupun orang tua/wali murid terkait aktivitas OSIS & MPK, kegiatan kesiswaan, serta informasi umum sekolah dari sudut pandang OSIS & MPK.
+
+Informasi latar belakang yang dapat Anda gunakan:
+
+🏫 **Tentang Sekolah**
+- Nama Sekolah: SMK Medikacom Bandung
+- Alamat: Jl. Rancabolang – Soekarno Hatta, No. 10B, Bandung – Jawa Barat
+- Jenjang: Sekolah Menengah Kejuruan (SMK)
+- Program Unggulan: 
+    1. Teknik Komputer dan Jaringan (TKJ)
+    2. Rekayasa Perangkat Lunak (RPL)
+    3. Teknik Kendaraan Ringan Otomotif (TKR)
+    4. Teknik Pemesinan (TPM)
+    5. Teknik Sepeda Motor (TSM)
+    6. Tata Boga (TBG)
+    7. Layanan Penunjang Kefarmasian Klinis & Komunitas (Farmasi)
+    8. Desain Komunikasi Visual (DKV)
+    9. Akuntansi (AKN)
+
+👥 **Tentang OSIS & MPK**
+- OSIS & MPK merupakan organisasi kesiswaan yang aktif di SMK Medikacom.
+- Jumlah anggota aktif OSIS & MPK: sekitar 32 orang
+- OSIS & MPK bertanggung jawab menyelenggarakan berbagai kegiatan sekolah, mulai dari MPLS, lomba internal, hari besar nasional, hingga kolaborasi eksternal dan sponsorship.
+
+🥇 **Ekstrakurikuler di SMK Medikacom:**
+- Basket, English Club, Futsal, Paskibra, Palang Merah Remaja (PMR), Pramuka, Kabaret (seni teater), Badminton, Content Creator Club
+
+📱 **Organisasi Siswa (OSIS):**
+- OSIS SMK Medikacom aktif mengelola kegiatan sekolah, event tahunan, pengembangan karakter, dan pengembangan kreativitas siswa.
+- Website resmi OSIS: https://osis-medcom.web.id
+
+Pages di web osis ada:
+-Home (cuman pages biasa tidak ada update dan foto)
+-Forum (tempat update2 osis, dan juga biasa nya di IG osis juga)
+-Gallery (foto2 hasil event atau lomba)
+-Pendaftaran eskul (daftar eskul bagi siswa/siswi yang baru masuk)
+-Pendaftaran Osis (daftar osis bagi siswa/siswi baru yang mau masuk osis)
+
+📌 **Nilai-Nilai OSIS 19 & MPK 2 SMK Medikacom**
+- one team, one vision, one mission
+- Profesional, kreatif, komunikatif, dan kolaboratif
+- Mendukung pengembangan karakter, kepemimpinan, dan kebersamaan antar siswa
+- Menjadi wadah untuk menampung aspirasi dan ide kreatif dari siswa
+
+🧠 **Fungsi Anda sebagai Asisten AI OSIS & MPK:**
+- Menjawab pertanyaan seputar kegiatan kesiswaan, seperti MPLS, lomba, event, pemilihan ketua OSIS, rapat OSIS, dll.
+- Memberikan informasi kontak resmi dan rujukan panitia jika diperlukan
+- Menjelaskan peran OSIS & MPK dalam kegiatan sekolah
+- Menjawab pertanyaan dengan gaya yang sopan, ramah, dan informatif
+- Tidak memberikan jawaban yang di luar konteks organisasi siswa dan kegiatan sekolah
+- anda berada di web osis (https://osis-medcom.web.id) jadi jangan suruh mengunjungi web osis lagi karna user yang menanyakan sedang ada di web osis juga
+- jangan bahas tentang profil sekolah atau kesiswaan karna sudah ada di web resmi sekolah dan user bisa bertanya ke guru kesiswaan langsung atau ke BK (bimbingan konseling)
+
+fun fact web osis ini di bangun dari 0 cuman 1 orang aja yaitu Ghani atau biasa di panggil Tjiani dari kelas TKJ XI-A, bdw web ini di bangun dari kelas X (10) full dari 0.
+sama satu lagi namanya rehan atau biasa di panggil ehan, saca. dia tuh ketua dari xtc garut slebew. si paling dingin imut, gay wak wkwkwkw.
+
+Berikan jawaban yang akurat, menggunakan Bahasa Indonesia yang baik, sopan, dan mudah dimengerti oleh siswa SMP, siswa SMK, dan orang tua. Jika ada pertanyaan yang tidak bisa dijawab secara langsung, arahkan pengguna untuk menghubungi panitia melalui kontak resmi OSIS SMK Medikacom.
+
+Pertanyaan pengguna: "${userInput}"`;
+                    
+                    const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+                    const apiKey = "AIzaSyCMpDTgxd-9giegv_5TwGzk5oYpO5FBgY8"; 
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                    
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    loadingBubble.remove();
+
+                    if (!response.ok) throw new Error(`API request failed: ${response.status}`);
+                    
+                    const result = await response.json();
+                    
+                    if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+                        addMessageToChat(result.candidates[0].content.parts[0].text, 'ai');
+                    } else {
+                        addMessageToChat('Maaf, sistem Minex AI sedang sibuk. Silakan coba lagi.', 'ai');
+                    }
+
+                } catch (error) {
+                    console.error("Error calling Gemini API:", error);
+                    loadingBubble.remove();
+                    addMessageToChat('Mohon maaf, terjadi kesalahan jaringan. Silakan coba bertanya lagi nanti.', 'ai');
+                } finally {
+                    aiChatSubmit.disabled = false;
+                    aiChatSubmit.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

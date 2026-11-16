@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daftar Anggota OSIS</title>
+    <link rel="stylesheet" href="daftar.css" />
+</head>
+
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">OSIS</div>
+            <ul class="nav-links">
+                <li><a href="../index.html">Beranda</a></li>
+                <li><a href="tentang.html">Tentang OSIS</a></li>
+                <li><a href="struktur.html">Struktur</a></li>
+                <li><a href="daftar-osis.html" class="active">Daftar OSIS</a></li>
+                <li><a href="daftar-eskul.html">Daftar Eskul</a></li>
+                <li><a href="kontak.html">Kontak</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="form-page">
+        <section class="form-section">
+            <h1>Formulir Pendaftaran Anggota OSIS</h1>
+            <form action="#" method="post" class="form-box">
+                <label for="nama">Nama Lengkap:</label>
+                <input type="text" id="nama" name="nama" required>
+
+                <label for="nisn">NISN:</label>
+                <input type="text" id="nisn" name="nisn" required>
+
+                <label for="kelas">Kelas:</label>
+                <input type="text" id="kelas" name="kelas" placeholder="Contoh: X IPA 2" required>
+
+                <label for="minat">Posisi yang Diinginkan:</label>
+                <input type="text" id="minat" name="minat" placeholder="Contoh: Sekretaris, Bendahara, dll" required>
+
+                <label for="alasan">Alasan Bergabung OSIS:</label>
+                <textarea id="alasan" name="alasan" rows="5" required></textarea>
+
+                <button type="submit">Kirim Pendaftaran</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 OSIS SMA [Nama Sekolah]. All rights reserved.</p>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Beranda OSIS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2a2f3d;
+            --secondary: #3a4054;
+            --accent: #4b89dc;
+            --text: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: var(--primary);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background-color: var(--secondary);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            transition: color 0.3s;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+
+        .nav-links a:hover {
+            background-color: var(--accent);
+            color: var(--primary);
+        }
+
+        .hero {
+            height: 70vh;
+            background: 
+                linear-gradient(to bottom, rgba(42, 47, 61, 0.7), rgba(58, 64, 84, 0.7)),
+                url('images/bg1.jpg') center/cover no-repeat;
+            margin-top: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            color: white;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: -1rem;
+            color: var(--accent);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 10rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* New Content Sections */
+        .content-section {
+            padding: 4rem 2rem;
+            background-color: var(--primary);
+        }
+
+        .section-title {
+            color: var(--accent);
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .content-card {
+            background: var(--secondary);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: transform 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .content-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .profile-card {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            border: 3px solid var(--accent);
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        footer {
+            background-color: var(--secondary);
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 4rem;
+        }
+        
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                background-color: var(--secondary);
+                padding: 1rem;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">OSIS Medikacom</div>
+            <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+            <ul class="nav-links">
+                <li><a href="https://osis-medcom.web.id">Beranda</a></li>
+                <li><a href="https://osis-medcom.web.id/pages/forum">Forum</a></li>
+                <li><a href="galery/">Galery</a></li>
+                <li><a href="pages/struktur.html">Struktur</a></li>
+                <li><a href="https://osis-medcom.web.id/daftar_osis">Daftar OSIS</a></li>
+                <li><a href="https://osis-medcom.web.id/daftar_eskul">Daftar Eskul</a></li>
+                <li><a href="pages/about.html">Tentang Kami</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Selamat Datang di OSIS SMK Medikacom</h1>
+            <p>Membangun Kreativitas dan Kepemimpinan Bersama</p>
+        </div>
+    </section>
+
+    <section class="content-section">
+        <h2 class="section-title">Event Terbaru</h2>
+        <div class="content-card" style="text-align: center;">
+            <h3 style="font-size: 1.8rem; color: var(--accent); margin-bottom: 1rem;">Pekan Olahraga dan Seni (PORSENI)</h3>
+            <p style="margin-bottom: 2rem;">
+                Ajang tahunan yang mempertemukan seluruh siswa dalam berbagai lomba olahraga dan seni untuk menumbuhkan semangat sportivitas dan kreativitas. 
+                Jangan lewatkan kesempatan ini untuk menunjukkan bakat terbaikmu!
+            </p>
+            <a href="https://osis-medcom.web.id/daftar_event" 
+               style="background-color: var(--accent); color: var(--text); padding: 0.75rem 1.5rem; border-radius: 6px; text-decoration: none; font-weight: bold; transition: background-color 0.3s;">
+               Daftar Sekarang
+            </a>
+        </div>
+    </section>
+    
+
+    <!-- New Content Sections -->
+    <section class="content-section">
+        <h2 class="section-title">Bidang OSIS</h2>
+        <div class="grid-container">
+            <div class="content-card">
+                <h3>Bidang 1 - Seksi Bidang Budi Pekerti</h3>
+                <p>Seksi bidang keimanan dan ketakwaan terhadap Tuhan Yang Maha Esa</p>
+            </div>
+            <div class="content-card">
+                <h3>Bidang 2 - budi pekerti</h3>
+                <p>Seksi bidang budi pekerti luhur atau akhlak mulia</p>
+            </div>
+            <div class="content-card">
+                <h3>Bidang 3 - Pendidikan</h3>
+                <p>Seksi bidang kepribadian unggul, wawasan kebangsaan, dan bela negara</p>
+            </div>
+            <div class="content-card">
+                <h3>Bidang 4 - Olahraga</h3>
+                <p>Seksi Bidang Akademik,Seni,Olahraga sesuai Bakat dan Minat</p>
+            </div>
+            <div class="content-card">
+                <h3>Bidang 5 - Demokrasi</h3>
+                <p>
+                    Seksi bidang demokrasi, hak asasi manusia, pendidikan politik, lingkungan hidup, kepekaan dan toleransi sosial dalam konteks masyarakat plural
+                </p>
+            </div>
+            <div class="content-card">
+                <h3>Bidang 6 - Kewirausahaan</h3>
+                <p>Seksi bidang kreativitas, keterampilan dan kewirausahaan</p>
+            </div>
+            <div class="content-card">
+                <h3>Bidang 7 - jasmi & Rohani</h3>
+                <p>Seksi bidang kualitas jasmani, kesehatan, dan gizi berbasis sumber gizi yang terdiversifikasi</p>
+            </div>
+            <div class="content-card">
+                <h3>Bidang 8 - Minat & Bakat</h3>
+                <p>bidang yang bertanggung jawab atas pembinaan dan pengembangan minat serta bakat siswa di bidang sastra dan budaya</p>
+            </div>
+
+            <div class="content-card">
+                <h3>Bidang 9 - Tekonologi informasi</h3>
+                <p>seksi yang menangani bidang Teknologi Informasi dan Komunikasi (TIK)</p>
+            </div>
+            <div class="content-card">
+                <h3>Bidang 10 - komunikasi dalam bahasa asing</h3>
+                <p>seksi bidang yang bertanggung jawab atas pembinaan komunikasi dalam bahasa asing, khususnya bahasa Inggris</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-section">
+        <h2 class="section-title">Pengurus Inti</h2>
+        <div class="grid-container">
+            <div class="content-card profile-card">
+                <img src="images/ketos1.jpg" 
+                     alt="Ketua OSIS" 
+                     class="profile-img">
+                <h3>Muhamad Irgie</h3>
+                <p>Ketua OSIS Periode 2024/2025</p>
+            </div>
+            <div class="content-card profile-card">
+                <img src="images/default.jpg" 
+                     alt="Ketua OSIS" 
+                     class="profile-img">
+                <h3>Aulia Putri Ginawati</h3>
+                <p>Wakil Ketua OSIS Periode 2024/2025</p>
+            </div>
+        </div>
+        
+        <div class="grid-container">
+            <div class="content-card profile-card">
+                <img src="images/dhafa.jpg" 
+                     alt="Ketua OSIS" 
+                     class="profile-img">
+                <h3>Daffa Habib Fairuuz</h3>
+                <p>Ketua MPK Periode 2024/2025</p>
+            </div>
+            <div class="content-card profile-card">
+                <img src="images/cici-Agis1.jpg" 
+                     alt="Ketua OSIS" 
+                     class="profile-img">
+                <h3>Agis Keysha</h3>
+                <p>Wakil Ketua MPK Periode 2024/2025</p>
+            </div>
+        </div>
+
+
+    </section>
+
+    <footer>
+        <p>&copy; 2025 OSIS SMK Medikacom. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.querySelector('.menu-toggle').addEventListener('click', () => {
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+    </script>
+</body>
+</html>

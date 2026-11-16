@@ -1,0 +1,95 @@
+<!-- 404.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>500 - Server hatchling malfunction</title>
+    <style>
+        :root {
+            --primary: #6777ef;
+            --danger: #fc544b;
+            --dark: #191d21;
+            --light: #e3e3e3;
+        }
+
+        body {
+            background: linear-gradient(45deg, #1a1a2e, #16213e);
+            color: var(--light);
+            font-family: 'Segoe UI', sans-serif;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .container {
+            padding: 2rem;
+            background: rgba(25, 29, 33, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            border: 1px solid var(--primary);
+            max-width: 600px;
+            margin: 1rem;
+        }
+
+        .error-code {
+            font-size: 8rem;
+            font-weight: bold;
+            text-shadow: 3px 3px 0 var(--primary);
+            margin: 0;
+            line-height: 1;
+        }
+
+        .message {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+            color: #a2a5b9;
+        }
+
+        .home-btn {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            border: 2px solid transparent;
+        }
+
+        .home-btn:hover {
+            background: transparent;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .ptera-decor {
+            position: fixed;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        .ptera-decor.left {
+            left: -150px;
+            transform: rotate(15deg);
+        }
+
+        .ptera-decor.right {
+            right: -150px;
+            transform: rotate(-15deg);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 class="error-code">500</h1>
+        <h2 class="message">Server hatchling malfunction</h2>
+        <p class="description">Our servers experienced an unexpected wing failure. The flock is working to resolve this!</p>
+        <a href="../index.html" class="home-btn">Return to Nest</a>
+    </div>
+</body>
+</html>

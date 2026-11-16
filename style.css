@@ -1,0 +1,141 @@
+/* style.css */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    line-height: 1.6;
+    background-color: #f9f9f9;
+    background-image: url(images/DSC_4354.jpg);
+    background-repeat: no-repeat;
+    background-size: contain;
+    color: #333;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #004080;
+    padding: 1rem 2rem;
+}
+
+.logo {
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 1rem;
+}
+
+.nav-links a {
+    color: #fff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: #ffcc00;
+}
+
+.hero {
+    background: url('images/DSC_4354.jpg') center/cover no-repeat;
+    height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+    padding: 2rem;
+}
+
+.hero-content {
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 1rem;
+    margin-bottom: 55vh;
+    border-radius: 20px;
+}
+
+.hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
+.btn {
+    background-color: #ffcc00;
+    color: #004080;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #e6b800;
+}
+
+.kegiatan-terbaru {
+    padding: 3rem 2rem;
+    background-color: #fff;
+    text-align: center;
+}
+
+.kegiatan-terbaru h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: #004080;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.card {
+    background-color: #f1f1f1;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card img {
+    width: max-content; 
+    height: 500px;
+    align-items: baseline;
+    align-content: center;
+    object-fit: cover;
+}
+
+.card h3 {
+    font-size: 1.2rem;
+    margin: 1rem 0 0.5rem;
+    color: #004080;
+}
+
+.card p {
+    padding: 0 1rem 1rem;
+    font-size: 0.95rem;
+}
+
+footer {
+    background-color: #004080;
+    color: #fff;
+    text-align: center;
+    padding: 1rem;
+    margin-top: 2rem;
+}

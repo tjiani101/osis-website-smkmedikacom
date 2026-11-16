@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>struktur OSIS SMK Medikacom</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        
+        .org-chart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 40px 0;
+        }
+
+        .org-level {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 25px 0;
+        }
+
+        .org-node {
+            background: #232a36;
+            border: 1px solid #2b3750;
+            border-radius: 8px;
+            padding: 20px;
+            min-width: 250px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .org-node::after {
+            content: "";
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            width: 1px;
+            height: 25px;
+            background: #2b3750;
+        }
+
+        .org-node.principal {
+            background: linear-gradient(135deg, #2b3750 0%, #1a2332 100%);
+            border-color: #4b89dc;
+            padding: 30px;
+        }
+
+        .org-node.highlight {
+            border-color: #6c5ce7;
+        }
+
+        .position-title {
+            color: #4b89dc;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .position-name {
+            color: #c3d1db;
+            font-size: 0.9rem;
+        }
+
+        .split-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .vertical-connector {
+            position: relative;
+            height: 40px;
+        }
+
+        .vertical-connector::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 1px;
+            height: 100%;
+            background: #2b3750;
+        }
+
+        @media (max-width: 768px) {
+            .org-level {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .split-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="container">
+            <div class="header">
+                <h1>📚 SOO (Struktur Organisasi OSIS) 18</h1>
+                <p>Platform created by osis 2025</p>
+            </div>
+    
+
+        <div class="content-section">
+            <h2>📚 SOO 18</h2>
+            
+            <div class="org-chart">
+                <!-- Kepala Sekolah -->
+                <div class="org-node principal">
+                    <div class="position-title">Kepala Sekolah</div>
+                    <div class="position-name">Dr. Dokmen Lubis, S.E.,M.M.</div>
+                </div>
+
+                <div class="vertical-connector"></div>
+
+                <div class="org-level">
+                    <div class="org-node highlight">
+                        <div class="position-title">PLT.Kepala sekolah</div>
+                        <div class="position-name">Iis Ismawati, S.Kom., M.Kom</div>
+                    </div>
+                </div>
+
+                <!-- Wakasek -->
+                <div class="org-level">
+                    <div class="org-node highlight">
+                        <div class="position-title">Wakil Kepala Sekolah Bidang Kesiswaan</div>
+                        <div class="position-name">Rani Nurhayati,S.Pd., M.M.</div>
+                    </div>
+                    <div class="org-node highlight">
+                        <div class="position-title">Wakil Kepala Sekolah Bidang Kurikulum</div>
+                        <div class="position-name">Rustianingsih, M.Si</div>
+                    </div>
+                </div>
+
+                <div class="vertical-connector"></div>
+
+                <!-- Pembina OSIS -->
+                <div class="org-node">
+                    <div class="position-title">Pembina OSIS</div>
+                    <div class="position-name">Diah Trisnamayanti, S.S</div>
+                </div>
+
+                <div class="vertical-connector"></div>
+
+                <!-- Ketua OSIS & MPK -->
+                <div class="split-container">
+                    <div class="org-column">
+                        <div class="org-node highlight">
+                            <div class="position-title">Ketua OSIS</div>
+                            <div class="position-name">Muhamad Irgi nur Hidayat</div>
+                        </div>
+                        <div class="vertical-connector"></div>
+                        <div class="org-node">
+                            <div class="position-title">Wakil Ketua OSIS</div>
+                            <div class="position-name">Aulia Putri Ginawati</div>
+                        </div>
+                    </div>
+
+                    <div class="org-column">
+                        <div class="org-node highlight">
+                            <div class="position-title">Ketua MPK</div>
+                            <div class="position-name">Dhafa Habib Fairuuz</div>
+                        </div>
+                        <div class="vertical-connector"></div>
+                        <div class="org-node">
+                            <div class="position-title">Wakil Ketua MPK</div>
+                            <div class="position-name">Agis Keysha</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <center>
+            <a href="https://osis-medcom.web.id" class="back-button">Kembali ke Beranda</a>
+        </center>
+
+        <div class="dev-team">
+            <p>Dikembangkan oleh Tjiani</p>
+            <p>Lead Developer: Ghani</p>
+        </div>
+    </div>
+</body>
+</html>

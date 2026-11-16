@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Under Construction | OSIS & MPK SMK Medikacom</title>
+    <link href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .animate-pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        .bg-radial-gradient {
+            background: radial-gradient(circle at 50% 80%, rgba(56, 189, 248, 0.3), rgba(37, 99, 235, 0.3), rgba(15, 23, 42, 1) 85%);
+        }
+        
+        .bg-gradient-border {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.8), rgba(14, 165, 233, 0.8), rgba(15, 23, 42, 0.8));
+        }
+    </style>
+</head>
+<body class="bg-slate-950 font-mulish text-slate-200 min-h-screen flex flex-col">
+    <!-- Background effects -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[100vw] lg:w-[800px] h-[400px] rounded-full bg-blue-500 opacity-20 blur-[150px]"></div>
+    
+    <!-- Navigation -->
+    <nav class="py-5">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="flex items-center">
+                        <div class="bg-slate-800 h-9 w-9 rounded-lg flex items-center justify-center mr-2">
+                            <span class="text-blue-500 font-bold text-xl">OS</span>
+                        </div>
+                        <span class="text-slate-100 text-sm font-semibold leading-4">OSIS & MPK<br>SMK MEDIKACOM</span>
+                    </div>
+                </div>
+                <div>
+                    <a href="https://osis-medcom.web.id/" class="text-blue-500 font-semibold hover:text-blue-400 transition">Kembali ke Beranda</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex items-center justify-center py-12 px-4">
+        <div class="max-w-3xl w-full">
+            <div class="bg-slate-900/70 backdrop-blur-sm rounded-2xl border border-blue-800/30 shadow-2xl shadow-blue-900/50 p-6 md:p-10 relative overflow-hidden">
+                <!-- Construction elements -->
+                <div class="absolute top-10 right-10 animate-float">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-yellow-500 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                    </svg>
+                </div>
+                
+                <div class="absolute bottom-10 left-10 animate-float" style="animation-delay: 1s;">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-500 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                    </svg>
+                </div>
+                
+                <div class="text-center relative z-10">
+                    <div class="flex justify-center mb-6">
+                        <div class="bg-yellow-500/20 border border-yellow-500/50 rounded-full p-5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-yellow-500 animate-pulse-slow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent mb-4">
+                        <span id="page-title">Halaman Sedang Dibangun</span>
+                    </h1>
+                    
+                    <p class="text-lg md:text-xl mb-8 max-w-2xl mx-auto">
+                        Mohon maaf, halaman yang Anda cari saat ini sedang dalam pengembangan. 
+                        Tim kami sedang bekerja keras untuk menyelesaikannya secepat mungkin.
+                    </p>
+                    
+                    <div class="flex flex-col md:flex-row justify-center gap-4">
+                        <a href="https://osis-medcom.web.id/" class="bg-gradient-to-r from-blue-700 to-sky-700 text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-all duration-300 transform hover:scale-105">
+                            Kembali ke Beranda
+                        </a>
+                        <a href="https://osis-medcom.web.id/galery/" class="border border-blue-500 text-blue-500 px-6 py-3 rounded-lg font-semibold hover:bg-blue-500/10 transition">
+                            Lihat Gallery
+                        </a>
+                    </div>
+                    
+                    <div class="mt-12 pt-8 border-t border-slate-700">
+                        <h3 class="text-lg font-semibold mb-4">Perkiraan waktu penyelesaian:</h3>
+                        <div class="flex items-center justify-center">
+                            <div class="bg-slate-800 rounded-lg p-4">
+                                <div class="text-2xl font-bold text-cyan-400">1-2 Hari</div>
+                            </div>
+                        </div>
+                        <p class="mt-4 text-slate-400 text-sm max-w-lg mx-auto">
+                        Kami berusaha menyelesaikan pengembangan halaman ini secepat mungkin. 
+                        Anda dapat mengikuti perkembangan terbaru melalui Instagram OSIS kami.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-10 text-center text-slate-500">
+                <p>© 2025 OSIS & MPK SMK Medikacom. All rights reserved.</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Set page title based on URL parameter
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const pageType = urlParams.get('type');
+            
+            const titleElement = document.getElementById('page-title');
+            
+            if(pageType === 'osis') {
+                titleElement.textContent = 'Pendaftaran OSIS Sedang Dibangun';
+            } else if(pageType === 'eskul') {
+                titleElement.textContent = 'Pendaftaran Ekstrakurikuler Sedang Dibangun';
+            }
+        });
+    </script>
+</body>
+</html>

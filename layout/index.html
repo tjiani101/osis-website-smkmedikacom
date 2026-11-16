@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+<title>OSIS SMK Medikacom</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link href="styles/layout.css" rel="stylesheet" type="text/css" media="all">
+</head>
+<body id="top">
+<!-- Top Background Image Wrapper -->
+<div class="bgded overlay" style="background-image:url('images/demo/backgrounds/01.png');">
+  <div class="wrapper row0">
+    <div id="topbar" class="hoc clear">
+      <div class="fl_left">
+        <ul class="nospace">
+          <li><i class="fas fa-phone rgtspace-5"></i> SMK Medikacom</li>
+          <li><i class="far fa-envelope rgtspace-5"></i> Osissmkmedikacom@proton.me</li>
+        </ul>
+      </div>
+      <div class="fl_right"></div>
+    </div>
+  </div>
+  <div class="wrapper row1">
+    <header id="header" class="hoc clear">
+      <div id="logo" class="fl_left">
+        <h1><a href="index.html">OSIS | SMK Medikacom</a></h1>
+      </div>
+      <nav id="mainav" class="fl_right">
+        <ul class="clear">
+          <li class="active"><a href="index.html">Home</a></li>
+          <li><a class="drop" href="#">Pendaftaran</a>
+            <ul>
+              <li><a href="daftar_osis.php">Daftar OSis</a></li>
+              <li><a href="daftar_eskul.php">Daftar Eskul</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </header>
+  </div>
+  <div id="pageintro" class="hoc clear">
+    <article>
+      <h3 class="heading">SMK | </h3>
+      <p>OSIS berperan dalam merancang, mengelola, dan melaksanakan berbagai program kerja yang mendukung kedisiplinan, kreativitas, dan solidaritas antar siswa. Melalui OSIS, siswa dilatih untuk bertanggung jawab, berorganisasi, dan menjadi pemimpin yang berintegritas.</p>
+      <footer>
+        <ul class="nospace inline pushright">
+          <li><a class="btn" href="daftar_osis.php">Gabung Sekarang</a></li>
+          <li><a class="btn inverse" href="#">Hasil Dokumentasi</a></li>
+        </ul>
+      </footer>
+    </article>
+  </div>
+</div>
+<div class="wrapper row3">
+  <main class="hoc container clear">
+    <section id="introblocks">
+      <ul class="nospace group btmspace-80">
+        <li class="one_third first">
+          <figure><a class="imgover" href="#"><img src="images/demo/348x261.png" alt=""></a>
+            <figcaption>
+              <h6 class="heading">judul</h6>
+              <p>deskripsi</p>
+            </figcaption>
+          </figure>
+        </li>
+        <li class="one_third">
+          <figure><a class="imgover" href="#"><img src="images/demo/348x261.png" alt=""></a>
+            <figcaption>
+              <h6 class="heading">judul</h6>
+              <p>deskripsi</p>
+            </figcaption>
+          </figure>
+        </li>
+        <li class="one_third">
+          <figure><a class="imgover" href="#"><img src="images/demo/348x261.png" alt=""></a>
+            <figcaption>
+              <h6 class="heading">judul</h6>
+              <p>deskripsi</p>
+            </figcaption>
+          </figure>
+        </li>
+      </ul>
+    </section>
+    <hr class="btmspace-80">
+    <section>
+      <h2>Formulir Pendaftaran OSIS</h2>
+      <form action="proses_daftar_osis.php" method="post">
+        <label for="nama">Nama Lengkap:</label><br>
+        <input type="text" id="nama" name="nama" required><br><br>
+
+        <label for="visi">Visi:</label><br>
+        <textarea id="visi" name="visi" required></textarea><br><br>
+
+        <label for="misi">Misi:</label><br>
+        <textarea id="misi" name="misi" required></textarea><br><br>
+
+        <label for="tujuan">Tujuan Masuk OSIS:</label><br>
+        <textarea id="tujuan" name="tujuan" required></textarea><br><br>
+
+        <label for="cerita">Cerita Singkat:</label><br>
+        <textarea id="cerita" name="cerita" required></textarea><br><br>
+
+        <input type="submit" value="Daftar">
+      </form>
+      <br><br>
+      <h2>Formulir Pendaftaran Ekstrakurikuler</h2>
+      <form action="proses_daftar_eskul.php" method="post">
+        <label for="nama">Nama Lengkap:</label><br>
+        <input type="text" id="nama" name="nama" required><br><br>
+
+        <label for="tanggal">Tanggal Lahir:</label><br>
+        <input type="date" id="tanggal" name="tanggal" required><br><br>
+
+        <label for="jurusan">Jurusan:</label><br>
+        <input type="text" id="jurusan" name="jurusan" required><br><br>
+
+        <label for="eskul">Pilih Ekstrakurikuler:</label><br>
+        <select id="eskul" name="eskul" required>
+          <option value="">--Pilih Ekstrakurikuler--</option>
+          <option value="Pramuka">Pramuka</option>
+          <option value="Paskibra">Paskibra</option>
+          <option value="PMR">PMR</option>
+          <option value="Futsal">Futsal</option>
+        </select><br><br>
+
+        <input type="submit" value="Daftar">
+      </form>
+    </section>
+    <div class="clear"></div>
+  </main>
+</div>
+<hr class="btmspace-80">
+
+<!-- FORM PENDAFTARAN OSIS -->
+<section class="hoc container clear">
+  <div class="sectiontitle">
+    <p class="nospace font-xs">Daftarkan dirimu sebagai bagian dari pengurus OSIS</p>
+    <p class="heading underline font-x2">Formulir Pendaftaran OSIS</p>
+  </div>
+  <form action="proses_daftar_osis.php" method="post">
+    <div class="group btmspace-50">
+      <label>Nama Lengkap:</label>
+      <input type="text" name="nama" placeholder="Masukkan Nama Lengkap" required>
+    </div>
+    <div class="group btmspace-50">
+      <label>Visi & Misi:</label>
+      <textarea name="visi_misi" placeholder="Tulis visi dan misi kamu" required></textarea>
+    </div>
+    <div class="group btmspace-50">
+      <label>Tujuan Masuk OSIS:</label>
+      <input type="text" name="tujuan" placeholder="Kenapa ingin masuk OSIS?" required>
+    </div>
+    <div class="group btmspace-50">
+      <label>Cerita Singkat Tentang Diri:</label>
+      <textarea name="cerita" placeholder="Ceritakan sedikit tentang dirimu" required></textarea>
+    </div>
+    <footer>
+      <input class="btn" type="submit" value="Daftar OSIS">
+    </footer>
+  </form>
+</section>
+
+<!-- FORM PENDAFTARAN ESKUL -->
+<section class="hoc container clear">
+  <div class="sectiontitle">
+    <p class="nospace font-xs">Ekspresikan dirimu lewat kegiatan ekstrakurikuler</p>
+    <p class="heading underline font-x2">Formulir Pendaftaran Ekstrakurikuler</p>
+  </div>
+  <form action="proses_daftar_eskul.php" method="post">
+    <div class="group btmspace-50">
+      <label>Nama Lengkap:</label>
+      <input type="text" name="nama" placeholder="Masukkan Nama Lengkap" required>
+    </div>
+    <div class="group btmspace-50">
+      <label>Tanggal Lahir:</label>
+      <input type="date" name="tanggal_lahir" required>
+    </div>
+    <div class="group btmspace-50">
+      <label>Jurusan:</label>
+      <input type="text" name="jurusan" placeholder="Contoh: TKJ, RPL, DKV" required>
+    </div>
+    <div class="group btmspace-50">
+      <label>Pilihan Ekstrakurikuler:</label>
+      <select name="pilihan_eskul" required>
+        <option value="">-- Pilih Eskul --</option>
+        <option value="Futsal">Futsal</option>
+        <option value="PMR">PMR</option>
+        <option value="Paskibra">Paskibra</option>
+        <option value="Pramuka">Pramuka</option>
+        <option value="Jurnalistik">Jurnalistik</option>
+      </select>
+    </div>
+    <footer>
+      <input class="btn inverse" type="submit" value="Daftar Ekstrakurikuler">
+    </footer>
+  </form>
+</section>
+
+</body>
+</html>

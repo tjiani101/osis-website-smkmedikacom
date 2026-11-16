@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSIS Medikacom | Big Bang Update</title>
+
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Flip.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js">
+    </script>
+    <script src="https://unpkg.com/@phosphor-icons/web">
+    </script>
+
+    <style>
+        :root {
+            --bg-color: #000000;
+            --island-collapsed-height: 48px;
+            --island-expanded-height: 440px;
+            --island-collapsed-width: min(340px, 92vw);
+            --island-expanded-width: min(400px, 94vw);
+            --island-collapsed-radius: 24px;
+            --island-expanded-radius: 36px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: #ffffff;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .fixed-bg {
+            position: fixed;
+            top: -5%;
+            left: -5%;
+            width: 110vw;
+            height: 110vh;
+            background-image: url('DSC06963.webp');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: blur(16px) brightness(0.2);
+            z-index: -10;
+            pointer-events: none;
+        }
+
+        .liquid-glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .liquid-glass-deep {
+            background: rgba(15, 15, 15, 0.75);
+            backdrop-filter: blur(30px) saturate(200%);
+            -webkit-backdrop-filter: blur(30px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .placeholder-box {
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .tracking-tightest {
+            letter-spacing: -0.05em;
+        }
+
+        /* Bento Box Styles */
+        .bento-box {
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+            transform-style: preserve-3d;
+            will-change: transform;
+        }
+
+        @media (min-width: 768px) {
+            .bento-box:hover:not(.ai-expanded):not(.flip-animating) {
+                transform: translateY(-8px) scale(1.02) rotateX(2deg) rotateY(-2deg);
+                background: rgba(255, 255, 255, 0.08);
+                border-color: rgba(255, 255, 255, 0.3);
+                box-shadow: -10px 30px 60px rgba(0, 0, 0, 0.5);
+            }
+        }
+
+        /* Disable CSS transitions during Flip */
+        .flip-animating {
+            transition: none !important;
+        }
+
+        /* AI Box Expanded State */
+        .ai-expanded {
+            grid-column: 1 / -1 !important;
+            grid-row: span 2 !important;
+            min-height: 420px !important;
+            background: rgba(15, 23, 42, 0.7) !important;
+            border-color: rgba(139, 92, 246, 0.5) !important;
+            z-index: 5 !important;
+        }
+        @media (min-width: 768px) {
+            .ai-expanded {
+                min-height: 480px !important;
+            }
+        }
+        @media (max-width: 767px) {
+            .ai-expanded {
+                min-height: 380px !important;
+                grid-row: span 2 !important;
+            }
+        }
+
+        #bento-container.grid-dense {
+            grid-auto-flow: dense;
+        }
+
+        #dynamic-island {
+            transform-origin: top center;
+            will-change: width, height, border-radius, background-color;
+            transition: none;
+        }
+
+        @keyframes island-breathe {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.08), 0 12px 24px rgba(0, 0, 0, 0.3); }
+            50% { box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.03), 0 12px 28px rgba(0, 0, 0, 0.35); }
+        }
+        #dynamic-island.idle-breathing {
+            animation: island-breathe 3s ease-in-out infinite;
+        }
+
+        @keyframes progress-pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+        .music-progress-fill {
+            animation: progress-pulse 2s ease-in-out infinite;
+        }
+
+        .toggle-switch {
+            transition: background 0.3s ease;
+        }
+        .toggle-switch.active {
+            background: #22c55e;
+        }
+        .toggle-dot {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .toggle-switch.active .toggle-dot {
+            transform: translateX(18px);
+        }
+
+        #di-expanded {
+            will-change: opacity, transform;
+        }
+
+        .faq-accordion .faq-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, opacity 0.3s ease;
+            opacity: 0;
+        }
+        .faq-accordion.open .faq-content {
+            max-height: 300px;
+            opacity: 1;
+        }
+        .faq-accordion .faq-icon {
+            transition: transform 0.3s ease;
+        }
+        .faq-accordion.open .faq-icon {
+            transform: rotate(45deg);
+        }
+    </style>
+</head>
+<body class="min-h-screen w-full relative">
+
+    <div class="fixed-bg"></div>
+
+    <!-- Loader -->
+    <div id="loader-screen" class="fixed inset-0 z-[100] flex items-center justify-center flex-col pointer-events-none bg-transparent">
+        <div class="logo-container flex items-center justify-center relative w-full h-32">
+            <img src="https://osis-medikacom.rf.gd/1.svg" alt="MPK" class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] logo-float-1 absolute transform -translate-x-12 sm:-translate-x-14 md:-translate-x-16">
+            <img src="https://osis-medikacom.rf.gd/2.svg" alt="OSIS" class="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] logo-float-2 absolute transform translate-x-12 sm:translate-x-14 md:translate-x-16">
+        </div>
+    </div>
+
+    <div id="big-bang-flash" class="fixed left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-white z-[95] pointer-events-none opacity-0" style="top: 50vh; box-shadow: 0 0 100px 50px rgba(255,255,255,0.8);"></div>
+
+    <!-- Dynamic Island -->
+    <div id="dynamic-island" class="liquid-glass fixed left-1/2 -translate-x-1/2 z-[90] overflow-hidden cursor-pointer"
+         style="top: 40px; width: min(340px, 92vw); height: 48px; border-radius: 24px; opacity: 1; transform: translateX(-50%);">
+
+        <div id="di-collapsed" class="absolute inset-0 w-full h-full flex items-center justify-between px-4 sm:px-5">
+            <div class="flex items-center gap-2">
+                <span id="island-clock" class="text-white/90 text-xs sm:text-sm font-bold tracking-wider font-mono">00:00</span>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3 absolute left-1/2 -translate-x-1/2">
+                <div class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]"></div>
+                <span class="text-white/90 text-[10px] sm:text-xs font-semibold tracking-widest uppercase hidden sm:block">Osis Medikacom</span>
+            </div>
+            <div class="w-6 h-6 flex items-center justify-center text-white/70">
+                <i class="ph ph-list text-lg"></i>
+            </div>
+        </div>
+
+        <div id="di-expanded" class="absolute inset-0 w-full h-full p-5 sm:p-6 flex flex-col opacity-0 pointer-events-none hidden" style="background: rgba(15,15,15,0.75);">
+            <div class="flex items-center justify-between mb-4 flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <img src="https://osis-medikacom.rf.gd/2.svg" class="w-7 h-7 object-contain drop-shadow-md" alt="OSIS">
+                    <div>
+                        <h4 class="text-white font-bold text-sm">OSIS Medikacom</h4>
+                        <span class="text-white/50 text-[10px] font-mono uppercase tracking-widest">Portal Navigasi</span>
+                    </div>
+                </div>
+                <button id="close-di-btn" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors backdrop-blur-md flex-shrink-0">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+
+            <div class="flex-shrink-0 mb-4 p-3 rounded-2xl bg-white/5 border border-white/8 flex items-center gap-3 group hover:bg-white/8 transition-colors cursor-default">
+                <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg relative overflow-hidden">
+                    <i class="ph-fill ph-music-notes text-white text-lg relative z-10"></i>
+                    <div class="absolute inset-0 bg-white/10 animate-pulse"></div>
+                </div>
+                <div class="flex-grow min-w-0">
+                    <p class="text-white text-xs sm:text-sm font-semibold truncate leading-tight">OSIS Podcast Episode 04</p>
+                    <p class="text-white/50 text-[10px] sm:text-xs truncate">Leadership &amp; Teamwork</p>
+                    <div class="mt-2 w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                        <div class="music-progress-fill h-full bg-gradient-to-r from-purple-400 to-blue-400 rounded-full" style="width: 62%;"></div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1 flex-shrink-0">
+                    <button class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center text-white/70 hover:text-white transition-all" title="Previous"><i class="ph-fill ph-skip-back text-xs"></i></button>
+                    <button class="w-8 h-8 rounded-full bg-white hover:bg-gray-200 flex items-center justify-center text-black transition-all shadow-md" title="Play/Pause"><i class="ph-fill ph-pause text-sm"></i></button>
+                    <button class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center text-white/70 hover:text-white transition-all" title="Next"><i class="ph-fill ph-skip-forward text-xs"></i></button>
+                </div>
+            </div>
+
+            <div class="flex-shrink-0 mb-4 flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/8">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center"><i class="ph ph-bell-ringing text-white/70 text-sm"></i></div>
+                    <div>
+                        <p class="text-white text-xs font-semibold">Notifikasi</p>
+                        <p class="text-white/40 text-[10px]">Info program & event terbaru</p>
+                    </div>
+                </div>
+                <button id="notif-toggle" class="toggle-switch active w-11 h-6 rounded-full flex items-center px-0.5 flex-shrink-0 transition-colors" style="background: #22c55e;" title="Toggle Notifications">
+                    <div class="toggle-dot w-5 h-5 rounded-full bg-white shadow-md" style="transform: translateX(18px);"></div>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2.5 flex-shrink-0">
+                <a href="#" class="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-colors group"><i class="ph ph-house text-xl text-white/60 group-hover:text-white transition-colors"></i><span class="text-[11px] font-semibold text-white/80 group-hover:text-white">Beranda</span></a>
+                <a href="#" class="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-colors group"><i class="ph ph-users-three text-xl text-white/60 group-hover:text-white transition-colors"></i><span class="text-[11px] font-semibold text-white/80 group-hover:text-white">Profil</span></a>
+                <a href="#" class="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-colors group"><i class="ph ph-calendar-check text-xl text-white/60 group-hover:text-white transition-colors"></i><span class="text-[11px] font-semibold text-white/80 group-hover:text-white">Program</span></a>
+                <a href="#" class="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-colors group"><i class="ph ph-paper-plane-tilt text-xl text-white/60 group-hover:text-white transition-colors"></i><span class="text-[11px] font-semibold text-white/80 group-hover:text-white">Kontak</span></a>
+            </div>
+
+            <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between flex-shrink-0">
+                <div class="flex items-center gap-1.5"><div class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></div><span class="text-green-400 text-[10px] font-medium tracking-wide">Sistem Aktif</span></div>
+                <span class="text-white/30 text-[10px] font-mono">OS v2.0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main id="main-content" class="relative z-10 pt-32 sm:pt-40 pb-16 min-h-screen flex flex-col" style="opacity: 0; transform: translateY(120px) scale(0.95);">
+
+        <!-- Hero Section -->
+        <section class="max-w-7xl mx-auto px-5 sm:px-6 md:px-12 flex flex-col items-center text-center mt-4 sm:mt-8 mb-16 md:mb-24">
+            <div class="inline-block px-4 sm:px-5 py-2 rounded-full liquid-glass text-[10px] sm:text-xs font-bold text-white/80 mb-6 sm:mb-8 uppercase tracking-[0.15em] sm:tracking-[0.2em] shadow-lg">Quotes by Steve Jobs</div>
+            <h1 class="text-5xl sm:text-6xl md:text-8xl lg:text-[7rem] font-black tracking-tightest text-white mb-6 sm:mb-8 hero-element drop-shadow-2xl leading-[1.1]">
+                Be a yardstick<br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-br from-white via-gray-300 to-gray-600"> of quality.</span>
+            </h1>
+            <p class="text-base sm:text-lg md:text-xl text-white/70 max-w-2xl font-medium hero-element leading-relaxed px-2">
+                Some people aren't used to an <br>environment where excellence is expected.
+            </p>
+        </section>
+
+        <!-- Bento Grid -->
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 flex-grow">
+            <div id="bento-container" class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 auto-rows-[220px] sm:auto-rows-[250px] md:auto-rows-[260px]">
+
+                <!-- BENTO 1: Foto Ketua OSIS (FIXED FOR MOBILE) -->
+                <div class="bento-box liquid-glass rounded-[32px] md:rounded-[40px] md:col-span-2 md:row-span-2 p-4 sm:p-6 md:p-8 flex flex-col justify-start md:justify-end relative overflow-hidden group min-h-0" id="bento-ketua">
+                    <!-- Placeholder: absolute on desktop, relative on mobile -->
+                    <div class="relative md:absolute md:inset-0 placeholder-box rounded-[24px] md:rounded-[32px] m-3 md:m-4 z-0 flex flex-col items-center justify-center h-48 md:h-full">
+                    
+                        <span class="text-white/40 font-bold uppercase tracking-widest text-xs md:text-sm text-center px-4"><img src="DSC06963.webp" alt=""></span>
+                    </div>
+                    <br>
+                    <br>
+                    <br>
+                    <!-- Text box: on mobile below placeholder, on desktop absolute overlay at bottom -->
+                    <div class="relative z-10 bg-black/60 p-4 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl backdrop-blur-xl border border-white/10 transform translate-y-2 md:group-hover:translate-y-0 transition-transform duration-500 w-full mt-4 md:mt-0 md:absolute md:bottom-4 md:left-4 md:right-4 md:w-auto">
+                        <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-white mb-1.5 md:mb-2 leading-tight drop-shadow-md">Together</h2>
+                        <p class="text-white/80 text-xs sm:text-sm leading-snug md:leading-relaxed line-clamp-2 md:line-clamp-none">
+                            Great things in business are never done by one person. They're done by a team of people.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- BENTO 2: Visi Misi -->
+                <div class="bento-box liquid-glass rounded-[32px] md:rounded-[40px] md:col-span-2 p-6 sm:p-8 flex flex-col justify-center relative overflow-hidden group" id="bento-visi">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-white/10 to-transparent rounded-bl-full pointer-events-none transition-transform duration-500 group-hover:scale-110"></div>
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/10 flex items-center justify-center mb-4 sm:mb-6 backdrop-blur-sm border border-white/5"><i class="ph ph-target text-2xl text-white/80"></i></div>
+                    <h3 class="text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-3 leading-tight">Visi & Misi</h3>
+                    <p class="text-sm sm:text-base text-white/60 leading-relaxed">visi visi, misi misi. don pley pley bos quu</p>
+                </div>
+
+                <!-- BENTO 3: Pendaftaran Event -->
+                <div class="bento-box liquid-glass rounded-[32px] md:rounded-[40px] md:col-span-1 flex flex-col items-center justify-center text-center p-5 sm:p-6 bg-gradient-to-br from-white/5 to-white/10 relative group" id="bento-event">
+                    <div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[32px] md:rounded-[40px]"></div>
+                    <h3 class="text-4xl sm:text-5xl font-black text-white mb-1 sm:mb-2 drop-shadow-lg">01</h3>
+                    <p class="text-[10px] sm:text-xs font-bold text-white/60 uppercase tracking-widest mb-4 sm:mb-6">HIDUP JOKO...</p>
+                    <button class="w-full py-3 sm:py-3.5 rounded-full bg-white text-black text-xs sm:text-sm font-bold hover:bg-gray-200 transition-all duration-300 shadow-[0_5px_20px_rgba(255,255,255,0.2)] hover:shadow-[0_5px_25px_rgba(255,255,255,0.4)] hover:-translate-y-1 relative z-10">Daftar Sekarang</button>
+                </div>
+
+                <!-- BENTO 4: Minex AI -->
+                <div id="ai-bento" class="bento-box liquid-glass rounded-[32px] md:rounded-[40px] md:col-span-1 p-0 relative overflow-hidden cursor-pointer flex flex-col group transition-[background-color,border-color] duration-500" style="z-index: 1;">
+                    <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-purple-600/30 rounded-full blur-3xl pointer-events-none group-hover:bg-purple-500/40 transition-colors"></div>
+                    <div class="absolute -top-10 -left-10 w-24 h-24 bg-blue-600/20 rounded-full blur-2xl pointer-events-none"></div>
+                    <div id="ai-intro" class="flex flex-col justify-between h-full p-6 sm:p-8 relative z-10 w-full transition-opacity duration-300">
+                        <div class="flex justify-between items-start">
+                            <span class="text-[10px] sm:text-xs font-bold text-white/70 uppercase tracking-[0.2em] flex items-center gap-2"><i class="ph-fill ph-robot text-purple-400 text-sm"></i> Minex AI</span>
+                            <div class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-purple-400 animate-pulse shadow-[0_0_12px_rgba(168,85,247,0.8)]"></div>
+                        </div>
+                        <div class="mt-auto"><h3 class="text-lg sm:text-xl font-bold text-white mb-1.5 sm:mb-2 group-hover:text-purple-300 transition-colors">Tanya Asisten</h3><p class="text-xs sm:text-sm text-white/60">Klik untuk ngobrol tentang OSIS!</p></div>
+                    </div>
+                    <div id="ai-chat-ui" class="hidden flex-col h-full w-full p-4 sm:p-6 relative z-10 opacity-0 pointer-events-none">
+                        <div class="flex items-center justify-between border-b border-white/10 pb-3 mb-3 flex-shrink-0">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg"><i class="ph-fill ph-robot text-white text-lg"></i></div>
+                                <div><h4 class="text-sm font-bold text-white">Minex Assistant</h4><span class="text-[10px] text-green-400 font-medium flex items-center gap-1"><div class="w-1.5 h-1.5 rounded-full bg-green-400"></div> Online</span></div>
+                            </div>
+                            <button id="close-ai-btn" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/20 flex items-center justify-center text-white/60 hover:text-white transition-colors flex-shrink-0"><i class="ph ph-x text-sm"></i></button>
+                        </div>
+                        <div id="chat-messages" class="flex-grow overflow-y-auto chat-scroll flex flex-col gap-3 pr-2 mb-3 min-h-0">
+                            <div class="flex justify-start"><div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%] text-sm text-white/90 shadow-sm">Halo bro/sist! Gua Minex AI. Ada yang mau ditanyain soal OSIS Medikacom atau program kerja kita?</div></div>
+                        </div>
+                        <div class="flex items-center gap-2 mt-auto flex-shrink-0">
+                            <div class="relative flex-grow"><input type="text" id="chat-input" placeholder="Ketik pertanyaanmu..." class="w-full bg-black/40 border border-white/20 rounded-full py-2.5 pl-4 pr-10 text-sm text-white placeholder-white/40 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all"></div>
+                            <button id="send-btn" class="w-10 h-10 rounded-full bg-purple-600 hover:bg-purple-500 flex items-center justify-center text-white shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all flex-shrink-0"><i class="ph-fill ph-paper-plane-tilt text-lg"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BENTO 5: Galeri Kegiatan -->
+                <div class="bento-box liquid-glass rounded-[32px] md:rounded-[40px] md:col-span-4 p-5 sm:p-8 flex flex-col relative overflow-hidden group" id="bento-galeri">
+                    <div class="flex justify-between items-center mb-4 sm:mb-6 relative z-10 flex-shrink-0">
+                        <h3 class="text-lg sm:text-xl font-bold text-white">Galeri Kegiatan</h3>
+                        <a href="#" class="text-[10px] sm:text-xs font-bold text-white/60 hover:text-white uppercase tracking-widest transition-colors flex items-center gap-1">Lihat Semua <i class="ph ph-arrow-right"></i></a>
+                    </div>
+                    <div class="w-full flex-grow flex gap-4 overflow-x-auto chat-scroll pb-2 relative z-10 min-h-0">
+                        <div class="min-w-[180px] sm:min-w-[260px] h-full rounded-2xl bg-black/30 border border-white/10 flex items-center justify-center group/img overflow-hidden relative flex-shrink-0">
+                            <div class="absolute inset-0 bg-[url('DSC06963.webp')] bg-cover bg-center opacity-80 group-hover/img:scale-110 transition-transform duration-700"></div>
+                            <!--<i class="ph ph-image text-3xl text-white/30 relative z-10"></i>-->
+                        </div>
+                        <div class="min-w-[180px] sm:min-w-[260px] h-full rounded-2xl bg-black/30 border border-white/10 flex items-center justify-center group/img overflow-hidden relative flex-shrink-0">
+                            <div class="absolute inset-0 bg-[url('DSC07081.webp')] bg-cover bg-center opacity-80 group-hover/img:scale-110 transition-transform duration-700"></div>
+                            
+                        </div>
+                        <div class="min-w-[180px] sm:min-w-[260px] h-full rounded-2xl bg-black/30 border border-white/10 flex items-center justify-center group/img overflow-hidden relative flex-shrink-0">
+                            <div class="absolute inset-0 bg-[url('DSC06950.webp')] bg-cover bg-center opacity-80 group-hover/img:scale-110 transition-transform duration-700"></div>
+                            
+                        </div>
+                        <div class="min-w-[180px] sm:min-w-[260px] h-full rounded-2xl bg-black/30 border border-white/10 flex items-center justify-center group/img overflow-hidden relative flex-shrink-0">
+                            <div class="absolute inset-0 bg-[url('DSC07161.webp')] bg-cover bg-center opacity-80 group-hover/img:scale-110 transition-transform duration-700"></div>
+                            
+                        </div>
+                        <div class="min-w-[90px] sm:min-w-[110px] h-full rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer text-white/40 hover:text-white flex-col gap-1 flex-shrink-0">
+                            <i class="ph ph-plus text-xl"></i><span class="text-[10px]">Lainnya</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== NEW SECTIONS ========== -->
+
+        <!-- Program Unggulan (Horizontal Scroll) -->
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 mt-24 md:mt-32 scroll-section">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl md:text-4xl font-bold tracking-tightest text-white">Program <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">Unggulan</span></h2>
+                <div class="hidden sm:flex gap-2">
+                    <button id="scroll-left" class="w-10 h-10 rounded-full liquid-glass flex items-center justify-center text-white/70 hover:text-white transition"><i class="ph ph-caret-left text-lg"></i></button>
+                    <button id="scroll-right" class="w-10 h-10 rounded-full liquid-glass flex items-center justify-center text-white/70 hover:text-white transition"><i class="ph ph-caret-right text-lg"></i></button>
+                </div>
+            </div>
+            <div id="program-scroll" class="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-2 px-2">
+                <div class="min-w-[260px] sm:min-w-[300px] liquid-glass rounded-3xl p-6 flex flex-col justify-between flex-shrink-0 hover:bg-white/10 transition cursor-pointer">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center mb-4"><i class="ph-fill ph-trophy text-2xl text-white"></i></div>
+                    <h3 class="text-lg font-bold text-white mb-2">Pekan Olahraga</h3>
+                    <p class="text-white/60 text-sm leading-relaxed">Kompetisi antar kelas yang mempererat solidaritas dan sportivitas.</p>
+                    <span class="text-purple-300 text-xs font-semibold mt-4 inline-flex items-center gap-1">Detail <i class="ph ph-arrow-right"></i></span>
+                </div>
+                <div class="min-w-[260px] sm:min-w-[300px] liquid-glass rounded-3xl p-6 flex flex-col justify-between flex-shrink-0 hover:bg-white/10 transition cursor-pointer">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-4"><i class="ph-fill ph-code text-2xl text-white"></i></div>
+                    <h3 class="text-lg font-bold text-white mb-2">Seminar Teknologi</h3>
+                    <p class="text-white/60 text-sm leading-relaxed">Mendatangkan praktisi industri untuk berbagi wawasan digital terkini.</p>
+                    <span class="text-purple-300 text-xs font-semibold mt-4 inline-flex items-center gap-1">Detail <i class="ph ph-arrow-right"></i></span>
+                </div>
+                <div class="min-w-[260px] sm:min-w-[300px] liquid-glass rounded-3xl p-6 flex flex-col justify-between flex-shrink-0 hover:bg-white/10 transition cursor-pointer">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mb-4"><i class="ph-fill ph-hand-heart text-2xl text-white"></i></div>
+                    <h3 class="text-lg font-bold text-white mb-2">Bakti Sosial</h3>
+                    <p class="text-white/60 text-sm leading-relaxed">Kegiatan peduli lingkungan dan masyarakat sekitar sekolah.</p>
+                    <span class="text-purple-300 text-xs font-semibold mt-4 inline-flex items-center gap-1">Detail <i class="ph ph-arrow-right"></i></span>
+                </div>
+                <div class="min-w-[260px] sm:min-w-[300px] liquid-glass rounded-3xl p-6 flex flex-col justify-between flex-shrink-0 hover:bg-white/10 transition cursor-pointer">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center mb-4"><i class="ph-fill ph-music-notes text-2xl text-white"></i></div>
+                    <h3 class="text-lg font-bold text-white mb-2">Pentas Seni</h3>
+                    <p class="text-white/60 text-sm leading-relaxed">Wadah ekspresi bakat siswa dalam musik, tari, dan teater.</p>
+                    <span class="text-purple-300 text-xs font-semibold mt-4 inline-flex items-center gap-1">Detail <i class="ph ph-arrow-right"></i></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Struktur Organisasi (Accordion) -->
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 mt-24 scroll-section">
+            <h2 class="text-2xl md:text-4xl font-bold tracking-tightest text-white mb-8">Struktur <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">Organisasi</span></h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="liquid-glass rounded-2xl p-5 hover:bg-white/10 transition cursor-pointer faq-accordion" data-accordion="ketua">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-sm font-bold">KA</div>
+                            <div><h4 class="font-semibold text-white">Ketua OSIS</h4><p class="text-white/50 text-xs">Saha weh</p></div>
+                        </div>
+                        <i class="ph ph-plus faq-icon text-white/60 text-xl"></i>
+                    </div>
+                    <div class="faq-content mt-3 text-sm text-white/70 pl-14">Memimpin rapat, mengoordinasikan seluruh program kerja, dan menjadi representasi OSIS di tingkat sekolah dan eksternal.</div>
+                </div>
+                <div class="liquid-glass rounded-2xl p-5 hover:bg-white/10 transition cursor-pointer faq-accordion" data-accordion="wakil">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-sm font-bold">WA</div>
+                            <div><h4 class="font-semibold text-white">Wakil Ketua</h4><p class="text-white/50 text-xs">Saha weh</p></div>
+                        </div>
+                        <i class="ph ph-plus faq-icon text-white/60 text-xl"></i>
+                    </div>
+                    <div class="faq-content mt-3 text-sm text-white/70 pl-14">Membantu ketua dalam pelaksanaan tugas, mengawasi divisi-divisi, serta menggantikan ketua jika berhalangan.</div>
+                </div>
+                <div class="liquid-glass rounded-2xl p-5 hover:bg-white/10 transition cursor-pointer faq-accordion" data-accordion="sekretaris">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-sm font-bold">KE</div>
+                            <div><h4 class="font-semibold text-white">Ketua MPK</h4><p class="text-white/50 text-xs">Saha weh</p></div>
+                        </div>
+                        <i class="ph ph-plus faq-icon text-white/60 text-xl"></i>
+                    </div>
+                    <div class="faq-content mt-3 text-sm text-white/70 pl-14">Mengawasi kinerja OSIS.</div>
+                </div>
+                <div class="liquid-glass rounded-2xl p-5 hover:bg-white/10 transition cursor-pointer faq-accordion" data-accordion="bendahara">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-sm font-bold">WA</div>
+                            <div><h4 class="font-semibold text-white">Wakil Ketua MPK</h4><p class="text-white/50 text-xs">Saha weh</p></div>
+                        </div>
+                        <i class="ph ph-plus faq-icon text-white/60 text-xl"></i>
+                    </div>
+                    <div class="faq-content mt-3 text-sm text-white/70 pl-14">Mengelola keuangan organisasi, membuat laporan keuangan berkala, dan mengawasi pemasukan serta pengeluaran dana.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Statistik / Pencapaian -->
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 mt-24 scroll-section">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="liquid-glass rounded-3xl p-6 text-center">
+                    <div class="text-3xl md:text-5xl font-black text-white mb-1 counter" data-target="50">0</div>
+                    <p class="text-white/50 text-xs sm:text-sm uppercase tracking-widest">Events Terselenggara</p>
+                </div>
+                <div class="liquid-glass rounded-3xl p-6 text-center">
+                    <div class="text-3xl md:text-5xl font-black text-white mb-1 counter" data-target="1200">0</div>
+                    <p class="text-white/50 text-xs sm:text-sm uppercase tracking-widest">Siswa Terlibat</p>
+                </div>
+                <div class="liquid-glass rounded-3xl p-6 text-center">
+                    <div class="text-3xl md:text-5xl font-black text-white mb-1 counter" data-target="3">0</div>
+                    <p class="text-white/50 text-xs sm:text-sm uppercase tracking-widest">Penghargaan</p>
+                </div>
+                <div class="liquid-glass rounded-3xl p-6 text-center">
+                    <div class="text-3xl md:text-5xl font-black text-white mb-1 counter" data-target="15">0</div>
+                    <p class="text-white/50 text-xs sm:text-sm uppercase tracking-widest">Divisi Aktif</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ / Bantuan -->
+        <section class="max-w-3xl mx-auto px-4 sm:px-6 mt-24 scroll-section">
+            <h2 class="text-2xl md:text-4xl font-bold tracking-tightest text-white mb-8 text-center">Pertanyaan <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">Umum</span></h2>
+            <div class="space-y-3">
+                <div class="liquid-glass rounded-2xl p-5 faq-accordion cursor-pointer" data-accordion="faq1">
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold text-white">Bagaimana cara bergabung dengan OSIS?</span>
+                        <i class="ph ph-plus faq-icon text-white/60 text-xl"></i>
+                    </div>
+                    <div class="faq-content mt-3 text-sm text-white/70">Pendaftaran dibuka setiap awal tahun ajaran. Pantau pengumuman di mading atau website resmi OSIS.</div>
+                </div>
+                <div class="liquid-glass rounded-2xl p-5 faq-accordion cursor-pointer" data-accordion="faq2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold text-white">Apa saja program kerja OSIS tahun ini?</span>
+                        <i class="ph ph-plus faq-icon text-white/60 text-xl"></i>
+                    </div>
+                    <div class="faq-content mt-3 text-sm text-white/70">Kami memiliki program olahraga, seni, teknologi, bakti sosial, dan seminar pengembangan diri. Lihat halaman Program untuk detail.</div>
+                </div>
+                <div class="liquid-glass rounded-2xl p-5 faq-accordion cursor-pointer" data-accordion="faq3">
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold text-white">Bagaimana cara mengusulkan ide atau aspirasi?</span>
+                        <i class="ph ph-plus faq-icon text-white/60 text-xl"></i>
+                    </div>
+                    <div class="faq-content mt-3 text-sm text-white/70">Kamu bisa mengisi form aspirasi di website kami atau langsung menghubungi sekretaris OSIS melalui media sosial resmi.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Enhanced Footer -->
+        <footer class="max-w-7xl mx-auto w-full px-5 mt-24 mb-10 relative z-10">
+            <div class="liquid-glass rounded-3xl p-6 sm:p-10 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h4 class="text-white font-bold text-lg mb-3">OSIS Medikacom</h4>
+                    <p class="text-white/50 text-sm leading-relaxed">Organisasi Siswa Intra Sekolah yang berkomitmen mencetak generasi kreatif dan berprestasi.</p>
+                    <div class="flex gap-3 mt-4">
+                        <a href="#" class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-purple-600 transition"><i class="ph ph-instagram-logo text-lg"></i></a>
+                        <a href="#" class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-blue-600 transition"><i class="ph ph-envelope text-lg"></i></a>
+                        <a href="#" class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-green-600 transition"><i class="ph ph-whatsapp-logo text-lg"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold text-sm mb-3 uppercase tracking-wider">Tautan Cepat</h4>
+                    <ul class="space-y-2 text-sm text-white/60">
+                        <li><a href="#" class="hover:text-white transition">Beranda</a></li>
+                        <li><a href="#" class="hover:text-white transition">Profil</a></li>
+                        <li><a href="#" class="hover:text-white transition">Program</a></li>
+                        <li><a href="#" class="hover:text-white transition">Kontak</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold text-sm mb-3 uppercase tracking-wider">Newsletter</h4>
+                    <p class="text-white/50 text-sm mb-3">Dapatkan info terbaru seputar kegiatan OSIS.</p>
+                    <form class="flex gap-2" onsubmit="event.preventDefault();">
+                        <input type="email" placeholder="Email kamu" class="flex-grow bg-black/40 border border-white/20 rounded-full py-2 px-4 text-sm text-white placeholder-white/40 focus:outline-none focus:border-purple-400">
+                        <button type="submit" class="bg-purple-600 hover:bg-purple-500 text-white rounded-full px-5 py-2 text-sm font-semibold transition">Daftar</button>
+                    </form>
+                </div>
+            </div>
+            <div class="mt-6 text-center text-white/40 text-xs flex flex-wrap items-center justify-center gap-2">
+                <span>&copy; 2024 OSIS Medikacom.</span>
+                <span>Powered by <a href="https://minex.gt.tc" target="_blank" class="text-white/80 font-semibold hover:text-purple-400 transition">Minex <i class="ph-fill ph-lightning inline"></i></a></span>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger, Flip);
+        const apiKey = "AQ.Ab8RN6I0oFR5FEg3lz10200M21sovz9-7z12ZTpTRGMBqxIo_g";
+
+        document.addEventListener("DOMContentLoaded", () => {
+            let introComplete = false;
+            let isDiOpen = false, isAiOpen = false, isAiAnimating = false, isDiAnimating = false;
+
+            // Clock
+            const clockEl = document.getElementById('island-clock');
+            const updateClock = () => { const d = new Date(); clockEl.textContent = d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0'); };
+            updateClock(); setInterval(updateClock, 1000);
+
+            // Intro animation
+            const tl = gsap.timeline({ onComplete: () => { introComplete = true; document.getElementById('dynamic-island').classList.add('idle-breathing'); } });
+            const float1 = gsap.to('.logo-float-1', { y: -10, duration: 1.5, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+            const float2 = gsap.to('.logo-float-2', { y: 10, duration: 1.5, yoyo: true, repeat: -1, ease: 'sine.inOut', delay: 0.2 });
+            setTimeout(() => {
+                float1.kill(); float2.kill();
+                tl.to('.logo-float-1', { x: 0, scale: 0, opacity: 0, duration: 0.6, ease: "back.in(1.5)" }, "merge")
+                  .to('.logo-float-2', { x: 0, scale: 0, opacity: 0, duration: 0.6, ease: "back.in(1.5)" }, "merge")
+                  .set('#big-bang-flash', { opacity: 1, width: '12px', height: '12px', boxShadow: '0 0 20px 10px rgba(255,255,255,0.8)' })
+                  .to('#big-bang-flash', { top: '40px', duration: 0.6, ease: "power3.inOut" }, "+=0.1")
+                  .to('#big-bang-flash', { scaleX: 3, scaleY: 1.5, duration: 0.4, ease: "power2.out" })
+                  .to('#big-bang-flash', { top: '60vh', scaleX: 1, scaleY: 2.5, duration: 0.35, ease: "power2.in" }, "strike")
+                  .add("bang")
+                  .to('#big-bang-flash', { scale: 150, opacity: 0, duration: 0.6, ease: "power1.out" }, "bang")
+                  .set('#dynamic-island', { opacity: 1, top: '40px', y: -20 })
+                  .to('#dynamic-island', { width: 'min(340px, 92vw)', height: '48px', borderRadius: '24px', y: 0, duration: 0.9, ease: "power3.out" }, "bang")
+                  .to('#main-content', { opacity: 1, y: 0, scale: 1, duration: 1, ease: "power3.out" }, "bang+=0.1")
+                  .to('#di-collapsed', { opacity: 1, duration: 0.4 }, "bang+=0.4");
+                setTimeout(() => { const loader = document.getElementById('loader-screen'); if(loader) loader.remove(); }, 3200);
+            }, 1500);
+
+            // Dynamic Island expand
+            const di = document.getElementById('dynamic-island'), diCollapsed = document.getElementById('di-collapsed'), diExpanded = document.getElementById('di-expanded'), closeDiBtn = document.getElementById('close-di-btn');
+            const baseW = 'min(340px, 92vw)', baseH = '48px', baseR = '24px', expW = 'min(400px, 94vw)', expH = '440px', expR = '36px';
+            function openIsland() {
+                if(!introComplete || isDiOpen || isDiAnimating) return;
+                isDiAnimating = true; isDiOpen = true; di.classList.remove('cursor-pointer','idle-breathing');
+                gsap.to(di, { width: expW, height: expH, borderRadius: expR, backgroundColor: 'rgba(15,15,15,0.8)', backdropFilter: 'blur(30px) saturate(200%)', borderColor: 'rgba(255,255,255,0.12)', duration: 0.55, ease: "power3.inOut", onComplete: ()=> isDiAnimating = false });
+                gsap.to(diCollapsed, { opacity: 0, duration: 0.25, onComplete: ()=> diCollapsed.style.pointerEvents = 'none' });
+                diExpanded.classList.remove('hidden');
+                gsap.fromTo(diExpanded, { opacity:0, scale:0.95 }, { opacity:1, scale:1, duration:0.35, delay:0.18, pointerEvents:'auto', ease:"power2.out" });
+            }
+            function closeIsland(e) {
+                if(e) e.stopPropagation();
+                if(!isDiOpen || isDiAnimating) return;
+                isDiAnimating = true; isDiOpen = false; di.classList.add('cursor-pointer');
+                gsap.to(di, { width: baseW, height: baseH, borderRadius: baseR, backgroundColor: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(24px) saturate(180%)', borderColor: 'rgba(255,255,255,0.08)', duration: 0.55, ease: "power3.inOut", onComplete: ()=>{ isDiAnimating=false; di.classList.add('idle-breathing'); } });
+                gsap.to(diExpanded, { opacity:0, scale:0.95, duration:0.25, onComplete: ()=>{ diExpanded.classList.add('hidden'); diExpanded.style.pointerEvents='none'; } });
+                diCollapsed.style.pointerEvents = 'auto';
+                gsap.to(diCollapsed, { opacity:1, duration:0.35, delay:0.18 });
+            }
+            di.addEventListener('click', (e) => { if(!isDiOpen && !e.target.closest('a') && !e.target.closest('button') && !e.target.closest('#di-expanded')) openIsland(); });
+            closeDiBtn.addEventListener('click', closeIsland);
+            const notifToggle = document.getElementById('notif-toggle');
+            if(notifToggle) notifToggle.addEventListener('click', (e) => { e.stopPropagation(); const act = notifToggle.classList.toggle('active'); notifToggle.style.background = act ? '#22c55e' : '#555'; notifToggle.querySelector('.toggle-dot').style.transform = act ? 'translateX(18px)' : 'translateX(0px)'; });
+
+            // Scroll animations for bento and new sections
+            setTimeout(() => {
+                gsap.utils.toArray('.bento-box, .scroll-section').forEach((el, i) => {
+                    gsap.from(el, { scrollTrigger: { trigger: el, start: "top 90%", toggleActions: "play none none reverse" }, y: 60, opacity: 0, duration: 0.8, ease: "power2.out", delay: i*0.05 });
+                });
+                // Counter animations
+                document.querySelectorAll('.counter').forEach(counter => {
+                    const target = +counter.getAttribute('data-target');
+                    gsap.fromTo(counter, { innerText: 0 }, { innerText: target, duration: 2, snap: { innerText: 1 }, scrollTrigger: { trigger: counter, start: "top 95%" } });
+                });
+                ScrollTrigger.refresh();
+            }, 3500);
+
+            // Minex AI Flip
+            const aiBento = document.getElementById('ai-bento'), aiIntro = document.getElementById('ai-intro'), aiChatUI = document.getElementById('ai-chat-ui'), closeAiBtn = document.getElementById('close-ai-btn'), bentoContainer = document.getElementById('bento-container');
+            const getAllBento = () => gsap.utils.toArray('#bento-container > .bento-box');
+            function resetInlineGrid() { getAllBento().forEach(b => { b.style.gridColumn = ''; b.style.gridRow = ''; }); }
+            function toggleAiBox(e) {
+                if(isAiAnimating) return;
+                if(e && e.target.closest('#ai-chat-ui') && !e.target.closest('#close-ai-btn')) return;
+                if(isAiOpen && e && e.target.closest('#ai-bento') && !e.target.closest('#close-ai-btn')) return;
+                isAiAnimating = true;
+                const boxes = getAllBento();
+                const state = Flip.getState([bentoContainer, ...boxes]);
+                boxes.forEach(b => b.classList.add('flip-animating'));
+                if(!isAiOpen) {
+                    isAiOpen = true; aiBento.classList.remove('cursor-pointer'); aiBento.classList.add('ai-expanded'); bentoContainer.classList.add('grid-dense');
+                    gsap.set(aiIntro, { opacity:0 }); aiIntro.classList.add('hidden');
+                    aiChatUI.classList.remove('hidden'); aiChatUI.classList.add('flex'); gsap.set(aiChatUI, { opacity:1, pointerEvents:'auto' });
+                } else {
+                    isAiOpen = false; aiBento.classList.add('cursor-pointer'); aiBento.classList.remove('ai-expanded'); bentoContainer.classList.remove('grid-dense');
+                    gsap.set(aiChatUI, { opacity:0, pointerEvents:'none' }); aiChatUI.classList.add('hidden'); aiChatUI.classList.remove('flex');
+                    aiIntro.classList.remove('hidden'); gsap.set(aiIntro, { opacity:1 });
+                }
+                bentoContainer.offsetHeight;
+                Flip.from(state, { duration:0.6, ease:"power3.inOut", absolute:true, scale:true, fade:false, onComplete:()=>{ boxes.forEach(b=>b.classList.remove('flip-animating')); resetInlineGrid(); ScrollTrigger.refresh(); isAiAnimating=false; if(!isAiOpen){ aiChatUI.classList.add('hidden'); aiChatUI.classList.remove('flex'); aiChatUI.style.opacity='0'; aiChatUI.style.pointerEvents='none'; aiIntro.classList.remove('hidden'); aiIntro.style.opacity='1'; } else { aiIntro.classList.add('hidden'); aiIntro.style.opacity='0'; aiChatUI.classList.remove('hidden'); aiChatUI.classList.add('flex'); aiChatUI.style.opacity='1'; aiChatUI.style.pointerEvents='auto'; } }, onInterrupt:()=>{ boxes.forEach(b=>b.classList.remove('flip-animating')); resetInlineGrid(); ScrollTrigger.refresh(); isAiAnimating=false; } });
+            }
+            aiBento.addEventListener('click', (e) => { if(!isAiOpen && !isAiAnimating) toggleAiBox(e); });
+            closeAiBtn.addEventListener('click', (e) => { e.stopPropagation(); if(isAiOpen && !isAiAnimating) toggleAiBox(e); });
+
+            // Chat
+            const chatInput = document.getElementById('chat-input'), sendBtn = document.getElementById('send-btn'), chatMessages = document.getElementById('chat-messages');
+            function appendMessage(text, sender) {
+                const div = document.createElement('div'); div.className = `flex ${sender==='user'?'justify-end':'justify-start'}`;
+                const content = sender==='user' ? text : marked.parse(text);
+                const bubble = sender==='user' ? 'bg-purple-600 text-white rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[85%] text-sm shadow-md' : 'bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[90%] text-sm text-white/90 shadow-sm markdown-content';
+                div.innerHTML = `<div class="${bubble}">${content}</div>`; chatMessages.appendChild(div); chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            async function sendMessage() {
+                const text = chatInput.value.trim(); if(!text) return;
+                appendMessage(text, 'user'); chatInput.value = '';
+                const loading = document.createElement('div'); loading.id='ai-loading'; loading.className='flex justify-start';
+                loading.innerHTML = `<div class="bg-white/5 border border-white/10 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2"><div class="w-1.5 h-1.5 bg-white/50 rounded-full animate-bounce"></div><div class="w-1.5 h-1.5 bg-white/50 rounded-full animate-bounce" style="animation-delay:0.1s"></div><div class="w-1.5 h-1.5 bg-white/50 rounded-full animate-bounce" style="animation-delay:0.2s"></div></div>`;
+                chatMessages.appendChild(loading); chatMessages.scrollTop = chatMessages.scrollHeight;
+                try {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{role:"user",parts:[{text:`Kamu adalah "Minex AI", asisten virtual keren untuk OSIS SMK Medikacom. Jawablah dengan ramah dan informatif. Pertanyaan pengguna: ${text}`}]}]}) });
+                    const data = await res.json(); document.getElementById('ai-loading')?.remove();
+                    if(data.candidates?.length) appendMessage(data.candidates[0].content.parts[0].text, 'ai');
+                    else appendMessage("Waduh, sistem gua lagi nge-lag nih bro. Coba lagi ya!", 'ai');
+                } catch(e) { console.error(e); document.getElementById('ai-loading')?.remove(); appendMessage("Koneksi lagi bermasalah nih, pastiin internet lu jalan ya!", 'ai'); }
+            }
+            sendBtn.addEventListener('click', sendMessage); chatInput.addEventListener('keypress', (e) => { if(e.key==='Enter') sendMessage(); });
+
+            // FAQ accordions
+            document.querySelectorAll('.faq-accordion').forEach(acc => {
+                acc.addEventListener('click', () => { acc.classList.toggle('open'); });
+            });
+
+            // Program horizontal scroll buttons
+            const scrollContainer = document.getElementById('program-scroll');
+            document.getElementById('scroll-left')?.addEventListener('click', () => scrollContainer.scrollBy({ left: -300, behavior: 'smooth' }));
+            document.getElementById('scroll-right')?.addEventListener('click', () => scrollContainer.scrollBy({ left: 300, behavior: 'smooth' }));
+
+            // Resize handler
+            let resizeDebounce;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeDebounce);
+                resizeDebounce = setTimeout(() => { ScrollTrigger.refresh(); if(isAiOpen){ aiBento.classList.add('ai-expanded'); bentoContainer.classList.add('grid-dense'); } }, 300);
+            });
+        });
+    </script>
+</body>
+</html>
