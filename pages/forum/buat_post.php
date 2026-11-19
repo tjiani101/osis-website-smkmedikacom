@@ -92,7 +92,7 @@ $forum_result = $conn->query("SELECT * FROM forum ORDER BY id ASC");
                             $slug = htmlspecialchars($forum['slug'] ?: strtolower(str_replace(' ', '-', $forum['nama'])));
                         ?>
                             <option value="<?= $forum['id'] ?>" <?= $preselected_id == $forum['id'] ? 'selected' : '' ?> class="bg-[#0b1021] text-white">
-                                r/<?= $slug ?> • <?= htmlspecialchars($forum['nama']) ?>
+                                sf/<?= $slug ?> • <?= htmlspecialchars($forum['nama']) ?>
                             </option>
                         <?php endwhile; ?>
                     </select>

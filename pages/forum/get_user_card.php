@@ -70,6 +70,15 @@ if ($badges_res) {
     }
 }
 
+// Fetch total upvotes
+$up_res = $conn->query("
+    SELECT COUNT(v.id) as total_upvotes 
+    FROM threads t 
+    JOIN votes v ON v.thread_id = t.id AND v.vote_type = 1 
+    WHERE t.user_id = $target_id
+");
+$total_upvotes = ($up_res && $u_row = $up_res->fetch_assoc()) ? (int)$u_row['total_upvotes'] : 0;
+
 echo json_encode([
     'success' => true,
     'user' => [
@@ -82,6 +91,7 @@ echo json_encode([
         'reputation_formatted' => format_reputation($target_user['reputation']),
         'followers_count' => (int)$target_user['followers_count'],
         'following_count' => (int)$target_user['following_count'],
+        'total_upvotes' => $total_upvotes,
         'joined_date' => date('d M Y', strtotime($target_user['joined_at'])),
         'tier' => $target_user['tier'] ?? 'Visitor',
         'active_perk' => $target_user['perk_label'] ? [

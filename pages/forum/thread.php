@@ -388,7 +388,7 @@ function displayRedditComments($parentId, &$commentTree, &$user_comment_votes, &
                         <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
                             <!-- Subreddit Pill -->
                             <a href="index.php?forum_id=<?= $thread['forum_id'] ?>" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/40 text-blue-300 transition-colors">
-                                r/<?= htmlspecialchars($thread['forum_slug'] ?: 'umum') ?>
+                                sf/<?= htmlspecialchars($thread['forum_slug'] ?: 'umum') ?>
                             </a>
                             <span class="text-white/40">•</span>
                             <span>oleh</span>

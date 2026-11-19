@@ -3,6 +3,9 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/forum_helpers.php';
 
+// Auto-cleanup archived threads older than 7 days (Permanently delete)
+$conn->query("DELETE FROM threads WHERE is_archived = 1 AND archived_at < NOW() - INTERVAL 7 DAY");
+
 // Create notifications table if not exists
 $conn->query("
 CREATE TABLE IF NOT EXISTS notifications (
@@ -55,12 +58,13 @@ if (isset($_SESSION['user_id'])) {
 $forum_id = isset($_GET['forum_id']) ? intval($_GET['forum_id']) : null;
 $sort = $_GET['sort'] ?? 'hot'; // default to Reddit Hot
 $search = isset($_GET['search']) ? trim($_GET['search']) : null;
+$view_archived = isset($_GET['view']) && $_GET['view'] === 'archived';
 
-// Base SQL
+// Base SQL for Threads
 $sql = "
     SELECT t.*, u.username, u.role, u.avatar, u.active_frame, u.reputation,
            p.badge_label as perk_label, p.color_class as perk_color, p.description as perk_desc,
-           f.nama AS forum_name, f.slug AS forum_slug, f.icon AS forum_icon,
+           f.nama AS forum_name, f.slug AS forum_slug, f.icon AS forum_icon, f.created_by AS forum_creator, f.banner_image AS forum_banner_image,
            COALESCE(SUM(v.vote_type), 0) AS vote_count,
            (SELECT COUNT(*) FROM comments c WHERE c.thread_id = t.id) AS comment_count,
            (SELECT COUNT(*) FROM votes v_up WHERE v_up.thread_id = t.id AND v_up.vote_type = 1) AS up_votes,
@@ -81,6 +85,14 @@ if ($search) {
     $searchSafe = $conn->real_escape_string($search);
     $conditions[] = "(t.judul LIKE '%$searchSafe%' OR t.konten LIKE '%$searchSafe%')";
 }
+
+// Archive filter (show archived only if explicitly requested)
+if ($view_archived) {
+    $conditions[] = "t.is_archived = 1";
+} else {
+    $conditions[] = "(t.is_archived = 0 OR t.is_archived IS NULL)";
+}
+
 if (!empty($conditions)) {
     $sql .= " WHERE " . implode(" AND ", $conditions);
 }
@@ -102,7 +114,9 @@ $threads = $conn->query($sql);
 
 // Dynamic sub-forums from database
 $forums_db = $conn->query("
-    SELECT f.*, (SELECT COUNT(*) FROM threads t WHERE t.forum_id = f.id) AS thread_count 
+    SELECT f.*, 
+           (SELECT COUNT(*) FROM threads t WHERE t.forum_id = f.id AND (t.is_archived = 0 OR t.is_archived IS NULL)) AS thread_count,
+           (SELECT COUNT(*) FROM threads t WHERE t.forum_id = f.id AND t.is_archived = 1) AS archived_count
     FROM forum f 
     ORDER BY f.id ASC
 ");
@@ -121,6 +135,38 @@ if ($forums_db) {
 $announcement_res = $conn->query("SELECT * FROM announcements WHERE is_active = 1 ORDER BY created_at DESC LIMIT 1");
 $active_announcement = ($announcement_res && $announcement_res->num_rows > 0) ? $announcement_res->fetch_assoc() : null;
 
+// Leaderboard: Top Reputasi
+$top_rep = [];
+$rep_q = $conn->query("SELECT id, username, role, avatar, active_frame, reputation FROM users ORDER BY reputation DESC LIMIT 5");
+if ($rep_q) { while ($r = $rep_q->fetch_assoc()) $top_rep[] = $r; }
+
+// Leaderboard: Top Followers
+$top_followers = [];
+$fol_q = $conn->query("SELECT id, username, role, avatar, active_frame, followers_count FROM users ORDER BY followers_count DESC LIMIT 5");
+if ($fol_q) { while ($r = $fol_q->fetch_assoc()) $top_followers[] = $r; }
+
+// Leaderboard: Top Upvoted
+$top_upvotes = [];
+$upv_q = $conn->query("
+    SELECT u.id, u.username, u.role, u.avatar, u.active_frame, COUNT(v.id) as total_upvotes
+    FROM users u
+    JOIN threads t ON t.user_id = u.id
+    JOIN votes v ON v.thread_id = t.id AND v.vote_type = 1
+    GROUP BY u.id
+    ORDER BY total_upvotes DESC
+    LIMIT 5
+");
+if ($upv_q) { while ($r = $upv_q->fetch_assoc()) $top_upvotes[] = $r; }
+
+// Community Stats for Sidebar
+$total_members = 0;
+$m_res = $conn->query("SELECT COUNT(*) as c FROM users");
+if ($m_res) $total_members = (int)$m_res->fetch_assoc()['c'];
+
+$total_threads_count = 0;
+$th_res = $conn->query("SELECT COUNT(*) as c FROM threads WHERE is_archived = 0 OR is_archived IS NULL");
+if ($th_res) $total_threads_count = (int)$th_res->fetch_assoc()['c'];
+
 // Get notifications for logged-in user
 $notifications = [];
 $unread_count = 0;
@@ -134,11 +180,9 @@ if (isset($_SESSION['user_id'])) {
         ORDER BY n.created_at DESC
         LIMIT 5
     ");
-
     if ($notif_query) {
         $notifications = $notif_query->fetch_all(MYSQLI_ASSOC);
     }
-
     $unread_result = $conn->query("
         SELECT COUNT(*) AS count 
         FROM notifications 
@@ -147,6 +191,12 @@ if (isset($_SESSION['user_id'])) {
     if ($unread_result) {
         $unread_count = $unread_result->fetch_assoc()['count'];
     }
+}
+
+// Check if user is creator of currently selected subforum
+$is_subforum_creator = false;
+if ($current_subforum && isset($_SESSION['user_id'])) {
+    $is_subforum_creator = ($current_subforum['created_by'] == $_SESSION['user_id']);
 }
 ?>
 <!DOCTYPE html>
@@ -172,9 +222,6 @@ if (isset($_SESSION['user_id'])) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <!-- Animate On Scroll (AOS) -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
     <!-- Liquid Theme Styles -->
     <link rel="stylesheet" href="../../assets/css/liquid-theme.css">
@@ -226,6 +273,20 @@ if (isset($_SESSION['user_id'])) {
             justify-content: center;
             border: 2px solid #05050f;
         }
+        /* Custom scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Discord Popover animations */
+        #user-hover-card {
+            transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: scale(0.96) translateY(-4px);
+        }
+        #user-hover-card.active {
+            opacity: 1 !important;
+            transform: scale(1) translateY(0) !important;
+            pointer-events: auto !important;
+        }
     </style>
 </head>
 <body class="selection:bg-blue-500/30 selection:text-white">
@@ -236,7 +297,7 @@ if (isset($_SESSION['user_id'])) {
     
     <!-- Compact Header & Navbar -->
     <header id="navbar" class="fixed top-0 left-0 right-0 z-50 pt-2 sm:pt-3 px-3 sm:px-6">
-        <nav class="max-w-5xl mx-auto">
+        <nav class="w-full max-w-[1720px] mx-auto">
             <div class="flex items-center justify-between liquid-glass px-3.5 sm:px-5 py-2">
                 
                 <!-- Logo & Brand -->
@@ -299,25 +360,25 @@ if (isset($_SESSION['user_id'])) {
                         </div>
 
                         <!-- Buat Post Button (Compact) -->
-                        <a href="buat_post.php" class="liquid-btn px-3 py-1.5 text-[11px] sm:text-xs font-bold flex items-center gap-1.5" title="Buat Topik">
+                        <a href="buat_post.php<?= $forum_id ? '?forum_id=' . $forum_id : '' ?>" class="liquid-btn px-3 py-1.5 text-[11px] sm:text-xs font-bold flex items-center gap-1.5" title="Buat Topik">
                             <i class="fa fa-pen text-[10px]"></i>
                             <span class="hidden sm:inline">Buat Topik</span>
                         </a>
 
-                        <!-- User Profile Link (Compact & well-fitted frame) -->
-                        <a href="profile.php" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all" title="Profil Saya">
+                        <!-- User Profile Link -->
+                        <a href="profile.php" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all user-hover-trigger" data-user-id="<?= $logged_user['id'] ?>" title="Profil Saya">
                             <?= render_avatar_with_frame($logged_user['username'], $logged_user['avatar'], $logged_user['active_frame'], 'xs') ?>
                             <span class="text-xs font-bold hidden md:inline max-w-[90px] truncate"><?= htmlspecialchars($logged_user['username']) ?></span>
                         </a>
 
-                        <!-- Admin Panel Shortcut (Icon only for compactness) -->
+                        <!-- Admin Panel Shortcut -->
                         <?php if ($is_admin): ?>
                             <a href="dev.php" class="p-1.5 rounded-full bg-purple-600/30 hover:bg-purple-600/50 border border-purple-500/40 text-purple-300 transition-all" title="Admin Panel">
                                 <i class="fa fa-shield-halved text-xs"></i>
                             </a>
                         <?php endif; ?>
 
-                        <!-- Logout (Icon) -->
+                        <!-- Logout -->
                         <a href="logout.php" class="p-1.5 rounded-full bg-white/5 hover:bg-red-500/20 text-white/60 hover:text-red-300 border border-white/10 transition-all" title="Keluar">
                             <i class="fa fa-arrow-right-from-bracket text-xs"></i>
                         </a>
@@ -350,6 +411,9 @@ if (isset($_SESSION['user_id'])) {
                             <a href="dev.php" class="py-2 text-purple-300 bg-purple-500/20 rounded-xl font-bold">🛡️ Admin Panel</a>
                         <?php endif; ?>
                         <a href="profile.php" class="py-2 text-blue-300 bg-blue-500/10 rounded-xl font-bold">Profil Akun Saya</a>
+                        <button onclick="openCreateSubforumModal()" class="py-2 text-indigo-300 bg-indigo-500/15 rounded-xl font-bold flex items-center justify-center gap-1.5">
+                            <i class="fa fa-folder-plus text-xs"></i> Buat Sub-Forum (1.200 ⭐)
+                        </button>
                         <a href="buat_post.php" class="liquid-btn py-2.5 font-bold mt-2">Buat Topik Baru</a>
                         <a href="logout.php" class="py-2 text-red-400 hover:text-red-300 font-semibold text-xs">Keluar</a>
                     <?php endif; ?>
@@ -358,8 +422,8 @@ if (isset($_SESSION['user_id'])) {
         </nav>
     </header>
 
-    <!-- Main Content Container: Clean & Centered Feed (No clunky right sidebar) -->
-    <main class="container mx-auto px-4 max-w-4xl pt-24 sm:pt-28 pb-24">
+    <!-- Main Content Container: 3 Columns Layout (Reddit Wide Style) -->
+    <main class="w-full max-w-[1780px] mx-auto px-3 sm:px-5 lg:px-6 xl:px-8 pt-24 sm:pt-28 pb-24">
 
         <!-- Active Broadcast Announcement (if any) -->
         <?php if ($active_announcement): 
@@ -371,7 +435,7 @@ if (isset($_SESSION['user_id'])) {
             ];
             $ann_bg = $ann_colors[$active_announcement['type']] ?? $ann_colors['info'];
         ?>
-            <div id="announcement-banner" class="mb-6 p-4 rounded-2xl border backdrop-blur-xl flex items-start justify-between gap-4 <?= $ann_bg ?> shadow-lg shadow-black/20" data-aos="fade-down">
+            <div id="announcement-banner" class="mb-5 p-4 rounded-2xl border backdrop-blur-xl flex items-start justify-between gap-4 <?= $ann_bg ?> shadow-lg shadow-black/20">
                 <div class="flex items-start gap-3">
                     <div class="p-2 rounded-xl bg-white/10 text-base shrink-0 mt-0.5">
                         <i class="fa fa-bullhorn animate-bounce"></i>
@@ -387,227 +451,1086 @@ if (isset($_SESSION['user_id'])) {
             </div>
         <?php endif; ?>
 
-        <!-- Subreddit Bar (Category Pill Navigation) -->
-        <div class="liquid-glass p-2.5 sm:p-3 mb-4 rounded-2xl border" data-aos="fade-up">
-            <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-                <a href="index.php<?= $sort !== 'hot' ? '?sort=' . $sort : '' ?>" class="whitespace-nowrap shrink-0 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all <?= !$forum_id ? 'bg-blue-600 text-white shadow-md' : 'bg-white/5 hover:bg-white/15 text-white/80 border border-white/10' ?>">
-                    <i class="fa fa-globe mr-1 text-[11px]"></i> r/all
-                </a>
-                <?php foreach ($forum_list as $id => $finfo): 
-                    $sub_slug = htmlspecialchars($finfo['slug'] ?: strtolower(str_replace(' ', '-', $finfo['nama'])));
-                ?>
-                    <a href="index.php?forum_id=<?= $id ?><?= $sort !== 'hot' ? '&sort=' . $sort : '' ?>" class="whitespace-nowrap shrink-0 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all <?= $forum_id == $id ? 'bg-blue-600 text-white shadow-md' : 'bg-white/5 hover:bg-white/15 text-white/80 border border-white/10' ?> flex items-center gap-1.5">
-                        <i class="fa <?= htmlspecialchars($finfo['icon'] ?? 'fa-comments') ?> text-[10px] opacity-75"></i>
-                        <span>r/<?= $sub_slug ?></span>
-                        <span class="text-[10px] px-1.5 rounded-full bg-white/10 font-mono"><?= $finfo['thread_count'] ?></span>
-                    </a>
-                <?php endforeach; ?>
-            </div>
-        </div>
-
-        <!-- Sub-forum Info Banner (If specific sub-forum selected) -->
-        <?php if ($current_subforum): ?>
-            <div class="mb-4 p-3.5 sm:p-4 rounded-2xl liquid-glass border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" data-aos="fade-up">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300 shrink-0 text-sm">
-                        <i class="fa <?= htmlspecialchars($current_subforum['icon'] ?? 'fa-comments') ?>"></i>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h3 class="font-extrabold text-white text-sm">r/<?= htmlspecialchars($current_subforum['slug']) ?></h3>
-                            <span class="text-[10px] px-2 py-0.2 rounded-full bg-white/10 text-white/70"><?= $current_subforum['thread_count'] ?> postingan</span>
-                        </div>
-                        <p class="text-xs text-white/60 mt-0.5"><?= htmlspecialchars($current_subforum['description'] ?: 'Ruang diskusi dan aspirasi siswa.') ?></p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto">
-                    <a href="buat_post.php?forum_id=<?= $current_subforum['id'] ?>" class="liquid-btn py-1.5 px-4 text-xs font-bold w-full sm:w-auto text-center">
-                        <i class="fa fa-plus text-[10px] mr-1"></i> Buat Topik
-                    </a>
-                </div>
-            </div>
-        <?php endif; ?>
-
-        <!-- Reddit Sorting Bar & Search (Compact) -->
-        <div class="liquid-glass p-3 sm:p-3.5 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-2.5 border mb-5">
+        <!-- 3-Column Wide Layout (Pushed to sides, maximum post width) -->
+        <div class="flex flex-col lg:flex-row gap-5 lg:gap-6 items-start justify-between">
             
-            <!-- Sorting Tabs: Hot, New, Top, Controversial -->
-            <div class="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto pb-1 no-scrollbar">
-                <a href="index.php?sort=hot<?= $forum_id ? '&forum_id=' . $forum_id : '' ?><?= $search ? '&search=' . urlencode($search) : '' ?>" class="whitespace-nowrap shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 <?= $sort === 'hot' ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md' : 'text-white/60 hover:text-white bg-white/5' ?>">
-                    <i class="fa fa-fire text-amber-300 text-[11px]"></i>
-                    <span>Hot</span>
-                </a>
-                <a href="index.php?sort=new<?= $forum_id ? '&forum_id=' . $forum_id : '' ?><?= $search ? '&search=' . urlencode($search) : '' ?>" class="whitespace-nowrap shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 <?= ($sort === 'new' || $sort === 'latest') ? 'bg-blue-600 text-white shadow-md' : 'text-white/60 hover:text-white bg-white/5' ?>">
-                    <i class="fa fa-clock text-blue-300 text-[11px]"></i>
-                    <span>New</span>
-                </a>
-                <a href="index.php?sort=top<?= $forum_id ? '&forum_id=' . $forum_id : '' ?><?= $search ? '&search=' . urlencode($search) : '' ?>" class="whitespace-nowrap shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 <?= $sort === 'top' ? 'bg-purple-600 text-white shadow-md' : 'text-white/60 hover:text-white bg-white/5' ?>">
-                    <i class="fa fa-trophy text-yellow-300 text-[11px]"></i>
-                    <span>Top</span>
-                </a>
-                <a href="index.php?sort=controversial<?= $forum_id ? '&forum_id=' . $forum_id : '' ?><?= $search ? '&search=' . urlencode($search) : '' ?>" class="whitespace-nowrap shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 <?= $sort === 'controversial' ? 'bg-red-600 text-white shadow-md' : 'text-white/60 hover:text-white bg-white/5' ?>">
-                    <i class="fa fa-bolt text-red-300 text-[11px]"></i>
-                    <span>Controversial</span>
-                </a>
-            </div>
-
-            <!-- Search Input Form -->
-            <form method="GET" action="index.php" class="w-full md:w-64">
-                <?php if ($forum_id): ?>
-                    <input type="hidden" name="forum_id" value="<?= $forum_id ?>">
-                <?php endif; ?>
-                <?php if ($sort !== 'hot'): ?>
-                    <input type="hidden" name="sort" value="<?= htmlspecialchars($sort) ?>">
-                <?php endif; ?>
-                <div class="relative">
-                    <input 
-                        type="text" 
-                        name="search" 
-                        placeholder="Cari topik diskusi..." 
-                        value="<?= htmlspecialchars($search ?? '') ?>" 
-                        class="liquid-input w-full pl-8 pr-6 py-1.5 text-xs rounded-full"
-                    >
-                    <svg class="w-3.5 h-3.5 text-white/40 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    <?php if ($search): ?>
-                        <a href="index.php<?= $forum_id ? '?forum_id=' . $forum_id : '' ?>" class="absolute right-2.5 top-1.5 text-white/40 hover:text-white text-xs">✕</a>
-                    <?php endif; ?>
-                </div>
-            </form>
-
-        </div>
-
-        <!-- Threads Feed (Spacious & Focused) -->
-        <div class="space-y-4">
-            <?php if ($threads && $threads->num_rows > 0): ?>
-                <?php while($row = $threads->fetch_assoc()): 
-                    $curr_vote = $user_votes[$row['id']] ?? 0;
-                    $sub_slug = htmlspecialchars($row['forum_slug'] ?: strtolower(str_replace(' ', '-', $row['forum_name'] ?? 'umum')));
-                    $active_perk_info = !empty($row['perk_label']) ? [
-                        'badge_label' => $row['perk_label'],
-                        'color_class' => $row['perk_color'],
-                        'description' => $row['perk_desc']
-                    ] : null;
-                ?>
-                    <div class="liquid-glass liquid-glass-interactive p-4 sm:p-5 thread-card relative overflow-hidden rounded-2xl border" data-thread-id="<?= $row['id'] ?>">
-                        <div class="flex items-start gap-3 sm:gap-4">
-                            
-                            <!-- Upvote / Downvote Pill -->
-                            <div class="vote-pill flex flex-col items-center shrink-0">
-                                <button class="vote-btn upvote <?= $curr_vote === 1 ? 'upvoted' : '' ?>" title="Upvote" onclick="handleVote(<?= $row['id'] ?>, 1, this)">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/></svg>
-                                </button>
-                                <span class="vote-count font-extrabold text-xs sm:text-sm text-white my-0.5 font-mono">
-                                    <?= $row['vote_count'] ?>
-                                </span>
-                                <button class="vote-btn downvote <?= $curr_vote === -1 ? 'downvoted' : '' ?>" title="Downvote" onclick="handleVote(<?= $row['id'] ?>, -1, this)">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
-                                </button>
+            <!-- ============================================== -->
+            <!-- LEFT SIDEBAR: SUB-FORUMS DIRECTORY             -->
+            <!-- ============================================== -->
+            <aside class="hidden lg:block w-64 xl:w-72 shrink-0 sticky top-24 space-y-4">
+                
+                <!-- Sub-Forum Directory Card -->
+                <div class="liquid-glass p-4 rounded-2xl border border-white/10 shadow-xl">
+                    <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs">
+                                <i class="fa fa-layer-group"></i>
                             </div>
+                            <h3 class="font-extrabold text-xs uppercase tracking-wider text-white">Sub-Forum</h3>
+                        </div>
+                        <span class="text-[10px] text-white/50 font-bold"><?= count($forum_list) ?> Komunitas</span>
+                    </div>
 
-                            <!-- Thread Body -->
-                            <div class="flex-1 min-w-0">
-                                
-                                <!-- Meta Header: Avatar + Frame + r/slug + Author + Perks -->
-                                <div class="flex flex-wrap items-center gap-2 mb-2 text-xs">
-                                    
-                                    <!-- Author Avatar with Frame -->
-                                    <?= render_avatar_with_frame($row['username'], $row['avatar'], $row['active_frame'], 'xs') ?>
+                    <!-- Button: Buat Sub-Forum (Cost 1200 Rep) -->
+                    <div class="mb-3.5">
+                        <button onclick="openCreateSubforumModal()" class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-blue-600/80 to-indigo-600/80 hover:from-blue-500 hover:to-indigo-500 border border-blue-400/30 text-white font-bold text-xs flex items-center justify-between group shadow-lg shadow-blue-900/20 transition-all hover:scale-[1.02]">
+                            <span class="flex items-center gap-1.5">
+                                <i class="fa fa-folder-plus text-blue-200 group-hover:rotate-6 transition-transform"></i>
+                                <span>Buat Sub-Forum</span>
+                            </span>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 border border-amber-400/40 text-amber-300 font-extrabold flex items-center gap-1">
+                                <i class="fa fa-star text-[9px] text-amber-400"></i> 1.200
+                            </span>
+                        </button>
+                    </div>
 
-                                    <!-- Subreddit r/topik Pill -->
-                                    <a href="index.php?forum_id=<?= $row['forum_id'] ?>" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/40 text-blue-300 transition-colors">
-                                        r/<?= $sub_slug ?>
-                                    </a>
+                    <!-- Sub-Forum Nav List -->
+                    <div class="space-y-1 max-h-[460px] overflow-y-auto pr-1 no-scrollbar">
+                        <!-- All Feeds -->
+                        <a href="index.php<?= $sort !== 'hot' ? '?sort=' . $sort : '' ?>" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all <?= !$forum_id ? 'bg-blue-600 text-white shadow-md' : 'text-white/70 hover:text-white hover:bg-white/10' ?>">
+                            <span class="flex items-center gap-2">
+                                <i class="fa fa-globe text-[11px] <?= !$forum_id ? 'text-white' : 'text-blue-400' ?>"></i>
+                                <span>sf/all (Semua)</span>
+                            </span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 font-mono"><?= $total_threads_count ?></span>
+                        </a>
 
-                                    <span class="text-white/40">•</span>
+                        <?php foreach ($forum_list as $id => $finfo): 
+                            $sub_slug = htmlspecialchars($finfo['slug'] ?: strtolower(str_replace(' ', '-', $finfo['nama'])));
+                            $is_active_sf = ($forum_id == $id);
+                            $is_sf_owner = (isset($_SESSION['user_id']) && $finfo['created_by'] == $_SESSION['user_id']);
+                        ?>
+                            <a href="index.php?forum_id=<?= $id ?><?= $sort !== 'hot' ? '&sort=' . $sort : '' ?>" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all <?= $is_active_sf ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-white/70 hover:text-white hover:bg-white/10' ?>">
+                                <span class="flex items-center gap-2 truncate pr-2">
+                                    <i class="fa <?= htmlspecialchars($finfo['icon'] ?? 'fa-comments') ?> text-[11px] <?= $is_active_sf ? 'text-white' : 'text-blue-400/80' ?>"></i>
+                                    <span class="truncate">sf/<?= $sub_slug ?></span>
+                                    <?php if ($is_sf_owner): ?>
+                                        <span class="text-[9px] text-amber-300" title="Anda pemilik sub-forum ini">👑</span>
+                                    <?php endif; ?>
+                                </span>
+                                <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 font-mono shrink-0"><?= $finfo['thread_count'] ?></span>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
 
-                                    <!-- Author Username + Role + Active Perk Flair -->
-                                    <span class="text-white/70 flex items-center gap-1.5 flex-wrap">
-                                        <span>oleh</span>
-                                        <?= render_user_flair($row['user_id'], $row['username'], $row['role'], $active_perk_info, $row['reputation'] ?? 0) ?>
-                                    </span>
+                <!-- Sub-forum Creator Authority & Rules Box -->
+                <div class="liquid-glass p-3.5 rounded-2xl border border-white/10 text-xs">
+                    <div class="flex items-center gap-2 text-amber-300 font-bold mb-1.5">
+                        <i class="fa fa-shield-halved text-xs"></i>
+                        <span>Wewenang Pemilik Sub-Forum</span>
+                    </div>
+                    <ul class="text-[11px] text-white/60 space-y-1.5 list-disc list-inside leading-relaxed">
+                        <li><strong class="text-white/80">Arsip Postingan:</strong> Postingan disembunyikan dan terhapus otomatis setelah 7 hari.</li>
+                        <li><strong class="text-white/80">Request Ban:</strong> Ajukan pemblokiran siswa bermasalah ke Admin/Dev.</li>
+                        <li><strong class="text-white/80">Biaya Komunitas:</strong> Butuh 1.200 Reputasi untuk membuka sub-forum baru.</li>
+                    </ul>
+                </div>
 
-                                    <span class="text-white/40">•</span>
-                                    <span class="text-white/40 text-[11px]">
-                                        <?= date('d M Y, H:i', strtotime($row['created_at'])) ?>
-                                    </span>
+            </aside>
+
+            <!-- ============================================== -->
+            <!-- CENTER: MAIN THREAD FEED (Expanded Width)      -->
+            <!-- ============================================== -->
+            <section class="flex-1 min-w-0 space-y-4">
+
+                <!-- Mobile / Tablet Sub-Forum Pill Navigation -->
+                <div class="lg:hidden liquid-glass p-2.5 rounded-2xl border flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+                    <button onclick="openCreateSubforumModal()" class="whitespace-nowrap shrink-0 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 flex items-center gap-1">
+                        <i class="fa fa-plus text-[10px]"></i> Buat (1.200 ⭐)
+                    </button>
+                    <a href="index.php<?= $sort !== 'hot' ? '?sort=' . $sort : '' ?>" class="whitespace-nowrap shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all <?= !$forum_id ? 'bg-blue-600 text-white' : 'bg-white/5 text-white/80' ?>">
+                        sf/all
+                    </a>
+                    <?php foreach ($forum_list as $id => $finfo): 
+                        $sub_slug = htmlspecialchars($finfo['slug'] ?: strtolower(str_replace(' ', '-', $finfo['nama'])));
+                    ?>
+                        <a href="index.php?forum_id=<?= $id ?><?= $sort !== 'hot' ? '&sort=' . $sort : '' ?>" class="whitespace-nowrap shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all <?= $forum_id == $id ? 'bg-blue-600 text-white' : 'bg-white/5 text-white/80' ?>">
+                            sf/<?= $sub_slug ?>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+
+                <!-- Sub-forum Info Banner (If specific sub-forum selected) -->
+                <?php if ($current_subforum): 
+                    $sf_creator_id = $current_subforum['created_by'];
+                    $can_manage_sf = ($is_subforum_creator || $is_admin);
+                ?>
+                    <div class="p-4 sm:p-5 rounded-2xl liquid-glass border border-white/15 relative overflow-hidden">
+                        <!-- Banner image overlay if exists -->
+                        <?php if (!empty($current_subforum['banner_image']) && file_exists(__DIR__ . '/uploads/' . $current_subforum['banner_image'])): ?>
+                            <div class="absolute inset-0 bg-cover bg-center opacity-20 pointer-events-none" style="background-image: url('uploads/<?= htmlspecialchars($current_subforum['banner_image']) ?>')"></div>
+                        <?php endif; ?>
+
+                        <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr <?= htmlspecialchars($current_subforum['banner_color'] ?? 'from-blue-600 to-indigo-600') ?> flex items-center justify-center text-white shrink-0 text-base shadow-lg shadow-black/30 border border-white/20">
+                                    <i class="fa <?= htmlspecialchars($current_subforum['icon'] ?? 'fa-comments') ?>"></i>
                                 </div>
-
-                                <!-- Thread Title -->
-                                <h2 class="text-base sm:text-lg font-bold text-white mb-2 leading-snug break-words">
-                                    <a href="thread.php?id=<?= $row['id'] ?>" class="hover:text-blue-300 transition-colors">
-                                        <?= htmlspecialchars($row['judul']) ?>
-                                    </a>
-                                </h2>
-
-                                <!-- Thread Content Excerpt -->
-                                <p class="text-xs sm:text-sm text-white/70 line-clamp-3 leading-relaxed mb-4 break-words">
-                                    <?= htmlspecialchars($row['konten']) ?>
-                                </p>
-
-                                <!-- Media Attachment -->
-                                <?php if (!empty($row['gambar'])): ?>
-                                    <div class="mb-4 rounded-xl sm:rounded-2xl overflow-hidden max-h-[400px] border border-white/10 bg-black/40 flex items-center justify-center">
-                                        <?php if ($row['media_type'] === 'video'): ?>
-                                            <video src="post/<?= htmlspecialchars($row['gambar']) ?>" controls class="w-full max-h-[400px] object-contain rounded-xl sm:rounded-2xl"></video>
-                                        <?php else: ?>
-                                            <img src="post/<?= htmlspecialchars($row['gambar']) ?>" alt="Lampiran" class="w-full max-h-[400px] object-contain rounded-xl sm:rounded-2xl" onerror="this.style.display='none'">
+                                <div>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h3 class="font-black text-white text-base">sf/<?= htmlspecialchars($current_subforum['slug']) ?></h3>
+                                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/80 font-bold"><?= $current_subforum['thread_count'] ?> postingan</span>
+                                        <?php if ($is_subforum_creator): ?>
+                                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/40 font-bold">
+                                                👑 Anda Pemilik
+                                            </span>
                                         <?php endif; ?>
                                     </div>
-                                <?php endif; ?>
-
-                                <!-- Thread Meta Footer -->
-                                <div class="flex items-center gap-2 sm:gap-3 pt-3 border-t border-white/10 text-xs text-white/60">
-                                    <a href="thread.php?id=<?= $row['id'] ?>" class="inline-flex items-center gap-1.5 hover:text-white transition-colors bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-full border border-white/10 text-[11px] sm:text-xs font-semibold">
-                                        <i class="fa fa-comment text-blue-400"></i>
-                                        <span><?= $row['comment_count'] ?> Komentar</span>
-                                    </a>
-
-                                    <!-- Quick Share -->
-                                    <button onclick="shareThread(<?= $row['id'] ?>, '<?= htmlspecialchars(addslashes($row['judul'])) ?>')" class="inline-flex items-center gap-1.5 hover:text-white transition-colors bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-full border border-white/10 text-[11px] sm:text-xs" title="Salin Tautan">
-                                        <i class="fa fa-share-nodes text-white/60"></i>
-                                        <span class="hidden sm:inline">Bagikan</span>
-                                    </button>
-
-                                    <a href="thread.php?id=<?= $row['id'] ?>" class="ml-auto text-blue-400 hover:text-blue-300 font-bold inline-flex items-center gap-1 text-[11px] sm:text-xs">
-                                        <span>Baca Diskusi</span>
-                                        <i class="fa fa-arrow-right text-[9px]"></i>
-                                    </a>
+                                    <p class="text-xs text-white/70 mt-0.5"><?= htmlspecialchars($current_subforum['description'] ?: 'Ruang diskusi dan aspirasi siswa Medikacom.') ?></p>
                                 </div>
                             </div>
-
+                            
+                            <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+                                <a href="buat_post.php?forum_id=<?= $current_subforum['id'] ?>" class="liquid-btn py-1.5 px-4 text-xs font-bold w-full sm:w-auto text-center flex items-center justify-center gap-1.5">
+                                    <i class="fa fa-plus text-[10px]"></i>
+                                    <span>Buat Topik</span>
+                                </a>
+                            </div>
                         </div>
+
+                        <!-- Creator Authority Toolbar (Archive Toggle & Ban Request) -->
+                        <?php if ($can_manage_sf): ?>
+                            <div class="relative z-10 mt-3 pt-3 border-t border-white/10 flex items-center justify-between flex-wrap gap-2 text-xs">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] text-white/50 uppercase font-bold">Wewenang:</span>
+                                    <a href="index.php?forum_id=<?= $current_subforum['id'] ?><?= $view_archived ? '' : '&view=archived' ?>" class="px-2.5 py-1 rounded-lg text-xs font-bold transition-colors <?= $view_archived ? 'bg-amber-500/20 text-amber-300 border border-amber-400/40' : 'bg-white/5 hover:bg-white/10 text-white/70' ?>">
+                                        <i class="fa fa-box-archive mr-1"></i>
+                                        <?= $view_archived ? 'Kembali ke Post Aktif' : 'Lihat Arsip (' . $current_subforum['archived_count'] . ')' ?>
+                                    </a>
+                                </div>
+                                <button onclick="openRequestBanModal(<?= $current_subforum['id'] ?>, 'sf/<?= htmlspecialchars($current_subforum['slug']) ?>')" class="px-2.5 py-1 rounded-lg bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 text-xs font-bold flex items-center gap-1">
+                                    <i class="fa fa-user-slash text-[10px]"></i>
+                                    <span>Request Ban Akun</span>
+                                </button>
+                            </div>
+                        <?php endif; ?>
                     </div>
-                <?php endwhile; ?>
-            <?php else: ?>
-                <div class="liquid-glass p-12 text-center rounded-2xl border" data-aos="zoom-in">
-                    <div class="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4 text-white/40 text-2xl">
-                        <i class="fa fa-comments"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Belum Ada Topik Diskusi</h3>
-                    <p class="text-white/60 text-sm max-w-sm mx-auto mb-6">
-                        Belum ada diskusi dalam kategori ini. Jadilah yang pertama memulai obrolan!
-                    </p>
-                    <?php if (isset($_SESSION['user_id'])): ?>
-                        <a href="buat_post.php<?= $forum_id ? '?forum_id=' . $forum_id : '' ?>" class="liquid-btn px-6 py-3 text-xs font-bold">
-                            Mulai Topik Pertama
+                <?php endif; ?>
+
+                <!-- Reddit Sorting Bar & Search -->
+                <div class="liquid-glass p-3 sm:p-3.5 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-2.5 border">
+                    
+                    <!-- Sorting Tabs: Hot, New, Top, Controversial -->
+                    <div class="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto pb-1 no-scrollbar">
+                        <a href="index.php?sort=hot<?= $forum_id ? '&forum_id=' . $forum_id : '' ?><?= $search ? '&search=' . urlencode($search) : '' ?><?= $view_archived ? '&view=archived' : '' ?>" class="whitespace-nowrap shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 <?= $sort === 'hot' ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md' : 'text-white/60 hover:text-white bg-white/5' ?>">
+                            <i class="fa fa-fire text-amber-300 text-[11px]"></i>
+                            <span>Hot</span>
                         </a>
+                        <a href="index.php?sort=new<?= $forum_id ? '&forum_id=' . $forum_id : '' ?><?= $search ? '&search=' . urlencode($search) : '' ?><?= $view_archived ? '&view=archived' : '' ?>" class="whitespace-nowrap shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 <?= ($sort === 'new' || $sort === 'latest') ? 'bg-blue-600 text-white shadow-md' : 'text-white/60 hover:text-white bg-white/5' ?>">
+                            <i class="fa fa-clock text-blue-300 text-[11px]"></i>
+                            <span>New</span>
+                        </a>
+                        <a href="index.php?sort=top<?= $forum_id ? '&forum_id=' . $forum_id : '' ?><?= $search ? '&search=' . urlencode($search) : '' ?><?= $view_archived ? '&view=archived' : '' ?>" class="whitespace-nowrap shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 <?= $sort === 'top' ? 'bg-purple-600 text-white shadow-md' : 'text-white/60 hover:text-white bg-white/5' ?>">
+                            <i class="fa fa-trophy text-yellow-300 text-[11px]"></i>
+                            <span>Top</span>
+                        </a>
+                        <a href="index.php?sort=controversial<?= $forum_id ? '&forum_id=' . $forum_id : '' ?><?= $search ? '&search=' . urlencode($search) : '' ?><?= $view_archived ? '&view=archived' : '' ?>" class="whitespace-nowrap shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 <?= $sort === 'controversial' ? 'bg-red-600 text-white shadow-md' : 'text-white/60 hover:text-white bg-white/5' ?>">
+                            <i class="fa fa-bolt text-red-300 text-[11px]"></i>
+                            <span>Controversial</span>
+                        </a>
+                    </div>
+
+                    <!-- Search Input Form -->
+                    <form method="GET" action="index.php" class="w-full md:w-56">
+                        <?php if ($forum_id): ?>
+                            <input type="hidden" name="forum_id" value="<?= $forum_id ?>">
+                        <?php endif; ?>
+                        <?php if ($sort !== 'hot'): ?>
+                            <input type="hidden" name="sort" value="<?= htmlspecialchars($sort) ?>">
+                        <?php endif; ?>
+                        <?php if ($view_archived): ?>
+                            <input type="hidden" name="view" value="archived">
+                        <?php endif; ?>
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                name="search" 
+                                placeholder="Cari topik diskusi..." 
+                                value="<?= htmlspecialchars($search ?? '') ?>" 
+                                class="liquid-input w-full pl-8 pr-6 py-1.5 text-xs rounded-full"
+                            >
+                            <svg class="w-3.5 h-3.5 text-white/40 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            <?php if ($search): ?>
+                                <a href="index.php<?= $forum_id ? '?forum_id=' . $forum_id : '' ?>" class="absolute right-2.5 top-1.5 text-white/40 hover:text-white text-xs">✕</a>
+                            <?php endif; ?>
+                        </div>
+                    </form>
+
+                </div>
+
+                <!-- Archived Mode Notice -->
+                <?php if ($view_archived): ?>
+                    <div class="p-3 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-200 text-xs flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2">
+                            <i class="fa fa-box-archive text-amber-400"></i>
+                            <span>Menampilkan postingan yang diarsipkan. Otomatis terhapus setelah 1 minggu sejak tanggal arsip.</span>
+                        </div>
+                        <a href="index.php<?= $forum_id ? '?forum_id=' . $forum_id : '' ?>" class="underline text-amber-300 font-bold shrink-0">Tutup Arsip</a>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Threads Feed -->
+                <div class="space-y-4">
+                    <?php if ($threads && $threads->num_rows > 0): ?>
+                        <?php while($row = $threads->fetch_assoc()): 
+                            $curr_vote = $user_votes[$row['id']] ?? 0;
+                            $sub_slug = htmlspecialchars($row['forum_slug'] ?: strtolower(str_replace(' ', '-', $row['forum_name'] ?? 'umum')));
+                            $active_perk_info = !empty($row['perk_label']) ? [
+                                'badge_label' => $row['perk_label'],
+                                'color_class' => $row['perk_color'],
+                                'description' => $row['perk_desc']
+                            ] : null;
+
+                            // Thread moderation privileges
+                            $can_archive_this = (
+                                isset($_SESSION['user_id']) && 
+                                ($row['forum_creator'] == $_SESSION['user_id'] || $is_admin)
+                            );
+                        ?>
+                            <div class="liquid-glass liquid-glass-interactive p-4 sm:p-5 thread-card relative overflow-hidden rounded-2xl border border-white/10" data-thread-id="<?= $row['id'] ?>">
+                                <div class="flex items-start gap-3 sm:gap-4">
+                                    
+                                    <!-- Upvote / Downvote Pill -->
+                                    <div class="vote-pill flex flex-col items-center shrink-0">
+                                        <button class="vote-btn upvote <?= $curr_vote === 1 ? 'upvoted' : '' ?>" title="Upvote" onclick="handleVote(<?= $row['id'] ?>, 1, this)">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/></svg>
+                                        </button>
+                                        <span class="vote-count font-extrabold text-xs sm:text-sm text-white my-0.5 font-mono">
+                                            <?= $row['vote_count'] ?>
+                                        </span>
+                                        <button class="vote-btn downvote <?= $curr_vote === -1 ? 'downvoted' : '' ?>" title="Downvote" onclick="handleVote(<?= $row['id'] ?>, -1, this)">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                        </button>
+                                    </div>
+
+                                    <!-- Thread Body -->
+                                    <div class="flex-1 min-w-0">
+                                        
+                                        <!-- Meta Header: Avatar + Frame + sf/slug + Author + Perks -->
+                                        <div class="flex flex-wrap items-center gap-2 mb-2 text-xs">
+                                            
+                                            <!-- Author Avatar with Frame (Hover & Click trigger) -->
+                                            <div class="user-hover-trigger cursor-pointer" data-user-id="<?= $row['user_id'] ?>">
+                                                <?= render_avatar_with_frame($row['username'], $row['avatar'], $row['active_frame'], 'xs') ?>
+                                            </div>
+
+                                            <!-- Sub-forum sf/topik Pill -->
+                                            <a href="index.php?forum_id=<?= $row['forum_id'] ?>" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/40 text-blue-300 transition-colors">
+                                                sf/<?= $sub_slug ?>
+                                            </a>
+
+                                            <span class="text-white/40">•</span>
+
+                                            <!-- Author Username + Role + Active Perk Flair -->
+                                            <span class="text-white/70 flex items-center gap-1.5 flex-wrap">
+                                                <span>oleh</span>
+                                                <?= render_user_flair($row['user_id'], $row['username'], $row['role'], $active_perk_info, $row['reputation'] ?? 0) ?>
+                                            </span>
+
+                                            <span class="text-white/40">•</span>
+                                            <span class="text-white/40 text-[11px]">
+                                                <?= date('d M Y, H:i', strtotime($row['created_at'])) ?>
+                                            </span>
+                                        </div>
+
+                                        <!-- Archived Notification Pill on Card -->
+                                        <?php if (!empty($row['is_archived'])): 
+                                            $arch_date = new DateTime($row['archived_at']);
+                                            $now_date = new DateTime();
+                                            $days_passed = $arch_date->diff($now_date)->days;
+                                            $days_left = max(0, 7 - $days_passed);
+                                        ?>
+                                            <div class="mb-2 px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between">
+                                                <span><i class="fa fa-box-archive mr-1"></i> Diarsipkan • Dihapus otomatis dalam <strong><?= $days_left ?> hari</strong></span>
+                                                <?php if ($can_archive_this): ?>
+                                                    <button onclick="unarchiveThread(<?= $row['id'] ?>)" class="underline text-white font-bold hover:text-amber-200">Pulihkan</button>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endif; ?>
+
+                                        <!-- Thread Title -->
+                                        <h2 class="text-base sm:text-lg font-bold text-white mb-2 leading-snug break-words">
+                                            <a href="thread.php?id=<?= $row['id'] ?>" class="hover:text-blue-300 transition-colors">
+                                                <?= htmlspecialchars($row['judul']) ?>
+                                            </a>
+                                        </h2>
+
+                                        <!-- Thread Content Excerpt -->
+                                        <p class="text-xs sm:text-sm text-white/70 line-clamp-3 leading-relaxed mb-4 break-words">
+                                            <?= htmlspecialchars($row['konten']) ?>
+                                        </p>
+
+                                        <!-- Media Attachment -->
+                                        <?php if (!empty($row['gambar'])): ?>
+                                            <div class="mb-4 rounded-xl sm:rounded-2xl overflow-hidden max-h-[520px] border border-white/10 bg-black/40 flex items-center justify-center">
+                                                <?php if ($row['media_type'] === 'video'): ?>
+                                                    <video src="post/<?= htmlspecialchars($row['gambar']) ?>" controls class="w-full max-h-[520px] object-contain rounded-xl sm:rounded-2xl"></video>
+                                                <?php else: ?>
+                                                    <img src="post/<?= htmlspecialchars($row['gambar']) ?>" alt="Lampiran" class="w-full max-h-[520px] object-contain rounded-xl sm:rounded-2xl" onerror="this.style.display='none'">
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endif; ?>
+
+                                        <!-- Thread Meta Footer -->
+                                        <div class="flex items-center gap-2 sm:gap-3 pt-3 border-t border-white/10 text-xs text-white/60 flex-wrap">
+                                            <a href="thread.php?id=<?= $row['id'] ?>" class="inline-flex items-center gap-1.5 hover:text-white transition-colors bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-full border border-white/10 text-[11px] sm:text-xs font-semibold">
+                                                <i class="fa fa-comment text-blue-400"></i>
+                                                <span><?= $row['comment_count'] ?> Komentar</span>
+                                            </a>
+
+                                            <!-- Quick Share -->
+                                            <button onclick="shareThread(<?= $row['id'] ?>, '<?= htmlspecialchars(addslashes($row['judul'])) ?>')" class="inline-flex items-center gap-1.5 hover:text-white transition-colors bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-full border border-white/10 text-[11px] sm:text-xs" title="Salin Tautan">
+                                                <i class="fa fa-share-nodes text-white/60"></i>
+                                                <span class="hidden sm:inline">Bagikan</span>
+                                            </button>
+
+                                            <!-- Sub-forum Creator Moderation Button -->
+                                            <?php if ($can_archive_this && empty($row['is_archived'])): ?>
+                                                <button onclick="archiveThread(<?= $row['id'] ?>)" class="inline-flex items-center gap-1 hover:text-amber-300 transition-colors bg-amber-500/10 hover:bg-amber-500/20 text-amber-300/80 px-2.5 py-1.5 rounded-full border border-amber-500/20 text-[11px]" title="Arsipkan postingan ini (dihapus setelah 7 hari)">
+                                                    <i class="fa fa-box-archive text-[10px]"></i>
+                                                    <span>Arsipkan</span>
+                                                </button>
+                                            <?php endif; ?>
+
+                                            <a href="thread.php?id=<?= $row['id'] ?>" class="ml-auto text-blue-400 hover:text-blue-300 font-bold inline-flex items-center gap-1 text-[11px] sm:text-xs">
+                                                <span>Baca Diskusi</span>
+                                                <i class="fa fa-arrow-right text-[9px]"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        <?php endwhile; ?>
                     <?php else: ?>
-                        <a href="login.php" class="liquid-btn px-6 py-3 text-xs font-bold">
-                            Masuk Untuk Buat Topik
-                        </a>
+                        <div class="liquid-glass p-12 text-center rounded-2xl border">
+                            <div class="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4 text-white/40 text-2xl">
+                                <i class="fa fa-comments"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-2">Belum Ada Topik Diskusi</h3>
+                            <p class="text-white/60 text-sm max-w-sm mx-auto mb-6">
+                                <?= $view_archived ? 'Tidak ada postingan yang diarsipkan dalam kategori ini.' : 'Belum ada diskusi dalam kategori ini. Jadilah yang pertama memulai obrolan!' ?>
+                            </p>
+                            <?php if (isset($_SESSION['user_id'])): ?>
+                                <a href="buat_post.php<?= $forum_id ? '?forum_id=' . $forum_id : '' ?>" class="liquid-btn px-6 py-3 text-xs font-bold">
+                                    Mulai Topik Pertama
+                                </a>
+                            <?php else: ?>
+                                <a href="login.php" class="liquid-btn px-6 py-3 text-xs font-bold">
+                                    Masuk Untuk Buat Topik
+                                </a>
+                            <?php endif; ?>
+                        </div>
                     <?php endif; ?>
                 </div>
-            <?php endif; ?>
+
+            </section>
+
+            <!-- ============================================== -->
+            <!-- RIGHT SIDEBAR: LEADERBOARD & COMMUNITY         -->
+            <!-- ============================================== -->
+            <aside class="hidden lg:block w-72 xl:w-80 shrink-0 sticky top-24 space-y-4">
+                
+                <!-- LEADERBOARD WIDGET -->
+                <div class="liquid-glass p-4 rounded-2xl border border-white/10 shadow-xl">
+                    <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs">
+                                <i class="fa fa-trophy"></i>
+                            </div>
+                            <h3 class="font-extrabold text-xs uppercase tracking-wider text-white">Leaderboard</h3>
+                        </div>
+                        <span class="text-[9px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/50 font-bold">Top 5</span>
+                    </div>
+
+                    <!-- Filter Tabs: Reputasi, Followers, Upvoted -->
+                    <div class="flex items-center p-1 rounded-xl bg-white/5 border border-white/10 mb-3 gap-1">
+                        <button onclick="switchLeaderboard('rep')" id="lb-tab-rep" class="lb-tab flex-1 py-1 text-[11px] font-bold rounded-lg transition-all bg-amber-500 text-white shadow-sm">
+                            ⭐ Rep
+                        </button>
+                        <button onclick="switchLeaderboard('followers')" id="lb-tab-followers" class="lb-tab flex-1 py-1 text-[11px] font-bold rounded-lg transition-all text-white/60 hover:text-white">
+                            👥 Follow
+                        </button>
+                        <button onclick="switchLeaderboard('upvotes')" id="lb-tab-upvotes" class="lb-tab flex-1 py-1 text-[11px] font-bold rounded-lg transition-all text-white/60 hover:text-white">
+                            ⬆️ Upvote
+                        </button>
+                    </div>
+
+                    <!-- PANEL 1: TOP REPUTASI -->
+                    <div id="lb-panel-rep" class="lb-panel space-y-2">
+                        <?php if (!empty($top_rep)): ?>
+                            <?php foreach ($top_rep as $idx => $user): 
+                                $rank = $idx + 1;
+                                $rank_decor = [
+                                    1 => 'bg-amber-400/20 text-amber-300 border-amber-400/40 font-extrabold',
+                                    2 => 'bg-slate-300/20 text-slate-200 border-slate-300/40 font-bold',
+                                    3 => 'bg-amber-700/20 text-amber-400 border-amber-700/40 font-bold',
+                                ];
+                                $badge_cls = $rank_decor[$rank] ?? 'bg-white/5 text-white/50 border-white/10';
+                            ?>
+                                <div class="flex items-center justify-between p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group">
+                                    <div class="flex items-center gap-2.5 min-w-0">
+                                        <span class="w-5 h-5 rounded-md flex items-center justify-center text-[10px] border <?= $badge_cls ?> shrink-0">
+                                            <?= $rank === 1 ? '🥇' : ($rank === 2 ? '🥈' : ($rank === 3 ? '🥉' : $rank)) ?>
+                                        </span>
+                                        <div class="user-hover-trigger cursor-pointer flex items-center gap-2 min-w-0" data-user-id="<?= $user['id'] ?>">
+                                            <?= render_avatar_with_frame($user['username'], $user['avatar'], $user['active_frame'], 'xs') ?>
+                                            <span class="text-xs font-bold text-white truncate max-w-[100px] group-hover:text-blue-300 transition-colors">
+                                                <?= htmlspecialchars($user['username']) ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs font-extrabold text-amber-300 font-mono shrink-0">
+                                        ⭐ <?= number_format($user['reputation']) ?>
+                                    </span>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p class="text-center py-4 text-xs text-white/40">Belum ada data.</p>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- PANEL 2: TOP FOLLOWERS -->
+                    <div id="lb-panel-followers" class="lb-panel space-y-2 hidden">
+                        <?php if (!empty($top_followers)): ?>
+                            <?php foreach ($top_followers as $idx => $user): 
+                                $rank = $idx + 1;
+                            ?>
+                                <div class="flex items-center justify-between p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group">
+                                    <div class="flex items-center gap-2.5 min-w-0">
+                                        <span class="w-5 h-5 rounded-md flex items-center justify-center text-[10px] border <?= $rank <= 3 ? 'bg-blue-500/20 text-blue-300 border-blue-400/40' : 'bg-white/5 text-white/50 border-white/10' ?> shrink-0">
+                                            <?= $rank ?>
+                                        </span>
+                                        <div class="user-hover-trigger cursor-pointer flex items-center gap-2 min-w-0" data-user-id="<?= $user['id'] ?>">
+                                            <?= render_avatar_with_frame($user['username'], $user['avatar'], $user['active_frame'], 'xs') ?>
+                                            <span class="text-xs font-bold text-white truncate max-w-[100px] group-hover:text-blue-300 transition-colors">
+                                                <?= htmlspecialchars($user['username']) ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs font-bold text-blue-300 font-mono shrink-0">
+                                        👥 <?= number_format($user['followers_count']) ?>
+                                    </span>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p class="text-center py-4 text-xs text-white/40">Belum ada data.</p>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- PANEL 3: TOP UPVOTED -->
+                    <div id="lb-panel-upvotes" class="lb-panel space-y-2 hidden">
+                        <?php if (!empty($top_upvotes)): ?>
+                            <?php foreach ($top_upvotes as $idx => $user): 
+                                $rank = $idx + 1;
+                            ?>
+                                <div class="flex items-center justify-between p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group">
+                                    <div class="flex items-center gap-2.5 min-w-0">
+                                        <span class="w-5 h-5 rounded-md flex items-center justify-center text-[10px] border <?= $rank <= 3 ? 'bg-indigo-500/20 text-indigo-300 border-indigo-400/40' : 'bg-white/5 text-white/50 border-white/10' ?> shrink-0">
+                                            <?= $rank ?>
+                                        </span>
+                                        <div class="user-hover-trigger cursor-pointer flex items-center gap-2 min-w-0" data-user-id="<?= $user['id'] ?>">
+                                            <?= render_avatar_with_frame($user['username'], $user['avatar'], $user['active_frame'], 'xs') ?>
+                                            <span class="text-xs font-bold text-white truncate max-w-[100px] group-hover:text-blue-300 transition-colors">
+                                                <?= htmlspecialchars($user['username']) ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs font-bold text-emerald-300 font-mono shrink-0">
+                                        ⬆️ <?= number_format($user['total_upvotes']) ?>
+                                    </span>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p class="text-center py-4 text-xs text-white/40">Belum ada data.</p>
+                        <?php endif; ?>
+                    </div>
+
+                </div>
+
+                <!-- COMMUNITY RULES & STATS -->
+                <div class="liquid-glass p-4 rounded-2xl border border-white/10 text-xs shadow-xl">
+                    <h4 class="font-extrabold text-white text-xs uppercase tracking-wider mb-2 flex items-center gap-2">
+                        <i class="fa fa-circle-info text-blue-400"></i>
+                        <span>Tentang Medikacom</span>
+                    </h4>
+                    <p class="text-[11px] text-white/60 leading-relaxed mb-3">
+                        Wadah diskusi, aspirasi, dan mading digital siswa SMK Medikacom. Dikelola oleh OSIS & MPK.
+                    </p>
+
+                    <div class="grid grid-cols-2 gap-2 text-center text-[10px] mb-3">
+                        <div class="p-2 rounded-xl bg-white/5 border border-white/10">
+                            <span class="text-white/40 block text-[9px] uppercase">Anggota</span>
+                            <strong class="text-white text-xs font-bold"><?= number_format($total_members) ?></strong>
+                        </div>
+                        <div class="p-2 rounded-xl bg-white/5 border border-white/10">
+                            <span class="text-white/40 block text-[9px] uppercase">Sub-Forum</span>
+                            <strong class="text-white text-xs font-bold"><?= count($forum_list) ?></strong>
+                        </div>
+                    </div>
+
+                    <div class="pt-2.5 border-t border-white/10">
+                        <span class="text-[10px] font-bold text-white/70 block mb-1">Tata Tertib Singkat:</span>
+                        <ul class="text-[11px] text-white/50 space-y-1 list-decimal list-inside leading-relaxed">
+                            <li>Jaga sopan santun & anti cyberbullying.</li>
+                            <li>Gunakan tag sub-forum yang relevan.</li>
+                            <li>Postingan arsip auto-hapus setelah 7 hari.</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </aside>
+
         </div>
 
     </main>
 
-    <!-- USER HOVER CARD (Floating Popover) -->
-    <div id="user-hover-card" class="fixed z-50 hidden liquid-glass p-4 rounded-2xl border border-white/20 shadow-2xl w-72 pointer-events-auto backdrop-blur-2xl transition-opacity duration-200 opacity-0"></div>
+    <!-- ============================================================== -->
+    <!-- DISCORD-STYLE USER HOVER & CLICK CARD (POPOVER)                 -->
+    <!-- ============================================================== -->
+    <div id="user-hover-card" class="fixed z-50 hidden liquid-glass p-0 rounded-2xl border border-white/20 shadow-2xl w-80 pointer-events-auto backdrop-blur-2xl opacity-0 overflow-hidden text-white"></div>
 
-    <!-- Script: AJAX Voting, Popover & Share -->
+    <!-- ============================================================== -->
+    <!-- MODAL: BUAT SUB-FORUM (Cost 1200 Rep)                          -->
+    <!-- ============================================================== -->
+    <div id="create-subforum-modal" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="liquid-glass w-full max-w-md p-5 sm:p-6 rounded-3xl border border-white/20 shadow-2xl relative">
+            <button onclick="closeCreateSubforumModal()" class="absolute top-4 right-4 text-white/60 hover:text-white w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-sm">✕</button>
+            
+            <div class="flex items-center gap-2.5 mb-4">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white text-base shadow-lg">
+                    <i class="fa fa-folder-plus"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-black text-white">Buat Sub-Forum Baru</h3>
+                    <p class="text-xs text-white/60">Biaya pembuatan: <span class="text-amber-300 font-extrabold">⭐ 1.200 Reputasi</span></p>
+                </div>
+            </div>
+
+            <!-- User Balance Status Alert -->
+            <?php 
+                $user_rep = $logged_user['reputation'] ?? 0;
+                $can_afford = ($user_rep >= 1200 || $is_admin);
+            ?>
+            <div class="mb-4 p-3 rounded-2xl border text-xs flex items-center justify-between <?= $can_afford ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-200' : 'bg-red-500/15 border-red-500/30 text-red-200' ?>">
+                <span>Reputasi Anda: <strong>⭐ <?= number_format($user_rep) ?></strong></span>
+                <?php if ($can_afford): ?>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">Cukup</span>
+                <?php else: ?>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-300">Kurang <?= 1200 - $user_rep ?></span>
+                <?php endif; ?>
+            </div>
+
+            <form id="form-create-subforum" onsubmit="handleCreateSubforum(event)" class="space-y-3.5 text-xs">
+                <div>
+                    <label class="block text-white/80 font-bold mb-1">Nama Sub-Forum</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2.5 text-blue-400 font-bold">sf/</span>
+                        <input type="text" name="nama" id="sf-nama-input" placeholder="contoh: programming, mading, futsal" required class="liquid-input w-full pl-9 pr-3 py-2 text-xs rounded-xl" oninput="updateSlugPreview(this.value)">
+                    </div>
+                    <span id="sf-slug-preview" class="text-[10px] text-white/50 mt-1 block">Tautan nanti: sf/</span>
+                </div>
+
+                <div>
+                    <label class="block text-white/80 font-bold mb-1">Deskripsi Singkat</label>
+                    <textarea name="description" placeholder="Ceritakan komunitas ini membahas topik apa..." rows="2" class="liquid-input w-full px-3 py-2 text-xs rounded-xl"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-white/80 font-bold mb-1">Icon FontAwesome</label>
+                        <select name="icon" class="liquid-input w-full px-2.5 py-2 text-xs rounded-xl bg-[#090d1f] text-white">
+                            <option value="fa-comments">💬 Diskusi (fa-comments)</option>
+                            <option value="fa-gamepad">🎮 Gaming (fa-gamepad)</option>
+                            <option value="fa-code">💻 Coding (fa-code)</option>
+                            <option value="fa-book-open">📚 Akademik (fa-book-open)</option>
+                            <option value="fa-futbol">⚽ Olahraga (fa-futbol)</option>
+                            <option value="fa-palette">🎨 Seni (fa-palette)</option>
+                            <option value="fa-camera">📸 Fotografi (fa-camera)</option>
+                            <option value="fa-music">🎵 Musik (fa-music)</option>
+                            <option value="fa-mug-hot">☕ Santai (fa-mug-hot)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-white/80 font-bold mb-1">Warna Banner</label>
+                        <select name="banner_color" class="liquid-input w-full px-2.5 py-2 text-xs rounded-xl bg-[#090d1f] text-white">
+                            <option value="from-blue-600 to-indigo-600">Biru Medika</option>
+                            <option value="from-purple-600 to-pink-600">Ungu Neon</option>
+                            <option value="from-emerald-600 to-teal-600">Hijau Zamrud</option>
+                            <option value="from-amber-600 to-orange-600">Emas Senja</option>
+                            <option value="from-rose-600 to-red-600">Merah Membara</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-white/80 font-bold mb-1">Gambar Banner Kustom (Opsional)</label>
+                    <input type="file" name="banner_file" accept="image/jpeg,image/png,image/webp" class="text-xs text-white/70 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-white/10 file:text-white hover:file:bg-white/20">
+                </div>
+
+                <div class="pt-2">
+                    <?php if ($can_afford): ?>
+                        <button type="submit" id="btn-submit-subforum" class="liquid-btn w-full py-2.5 text-xs font-bold flex items-center justify-center gap-1.5 shadow-lg shadow-blue-900/40">
+                            <i class="fa fa-check"></i>
+                            <span>Buat Sub-Forum & Bayar 1.200 ⭐</span>
+                        </button>
+                    <?php else: ?>
+                        <button type="button" disabled class="w-full py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/40 font-bold text-xs cursor-not-allowed">
+                            Reputasi Tidak Mencukupi (Butuh 1.200 ⭐)
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- MODAL: REQUEST BAN AKUN (Verifikasi Admin/Dev)                   -->
+    <!-- ============================================================== -->
+    <div id="request-ban-modal" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="liquid-glass w-full max-w-sm p-5 rounded-3xl border border-white/20 shadow-2xl relative">
+            <button onclick="closeRequestBanModal()" class="absolute top-4 right-4 text-white/60 hover:text-white w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-sm">✕</button>
+            
+            <div class="flex items-center gap-2 mb-3">
+                <div class="w-8 h-8 rounded-xl bg-red-500/20 text-red-400 flex items-center justify-center text-sm">
+                    <i class="fa fa-user-slash"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-white">Ajukan Ban Siswa</h3>
+                    <p id="ban-modal-forum-label" class="text-[11px] text-white/50">Sub-Forum: sf/...</p>
+                </div>
+            </div>
+
+            <p class="text-[11px] text-white/60 mb-3 leading-relaxed">
+                Pengajuan ban akan masuk ke daftar verifikasi Admin & Dev OSIS. Berikan alasan dan bukti yang objektif.
+            </p>
+
+            <form id="form-request-ban" onsubmit="handleRequestBan(event)" class="space-y-3 text-xs">
+                <input type="hidden" name="forum_id" id="ban-forum-id-val">
+                
+                <div>
+                    <label class="block text-white/80 font-bold mb-1">Target Pengguna</label>
+                    <select name="target_user_id" id="ban-target-user-select" required class="liquid-input w-full px-3 py-2 text-xs rounded-xl bg-[#090d1f] text-white">
+                        <option value="">Pilih Siswa...</option>
+                        <?php 
+                        $all_u = $conn->query("SELECT id, username FROM users WHERE status = 'active' ORDER BY username ASC");
+                        if ($all_u) {
+                            while ($u = $all_u->fetch_assoc()) {
+                                if (isset($_SESSION['user_id']) && $u['id'] == $_SESSION['user_id']) continue;
+                                echo '<option value="' . $u['id'] . '">' . htmlspecialchars($u['username']) . '</option>';
+                            }
+                        }
+                        ?>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-white/80 font-bold mb-1">Alasan Pelanggaran</label>
+                    <textarea name="reason" rows="3" placeholder="Sebutkan pelanggaran (cth: spam, toxic, SARA, provokasi)..." required class="liquid-input w-full px-3 py-2 text-xs rounded-xl"></textarea>
+                </div>
+
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-lg shadow-red-900/30 transition-all">
+                    Kirim Pengajuan ke Admin/Dev
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script: AJAX Voting, Discord Popover, Leaderboard & Sub-Forum -->
     <script>
-        // Vote handling
+        // ==========================================
+        // 1. LEADERBOARD TAB SWITCHER
+        // ==========================================
+        function switchLeaderboard(type) {
+            document.querySelectorAll('.lb-panel').forEach(p => p.classList.add('hidden'));
+            document.querySelectorAll('.lb-tab').forEach(t => {
+                t.classList.remove('bg-amber-500', 'text-white', 'shadow-sm');
+                t.classList.add('text-white/60');
+            });
+
+            const panel = document.getElementById(`lb-panel-${type}`);
+            const tab = document.getElementById(`lb-tab-${type}`);
+            if (panel && tab) {
+                panel.classList.remove('hidden');
+                tab.classList.add('bg-amber-500', 'text-white', 'shadow-sm');
+                tab.classList.remove('text-white/60');
+            }
+        }
+
+        // ==========================================
+        // 2. DISCORD-STYLE HOVER & CLICK POPOVER
+        // ==========================================
+        const hoverCard = document.getElementById('user-hover-card');
+        let hoverTimeout = null;
+        let cardCache = {};
+        let activeTrigger = null;
+
+        function positionHoverCard(el) {
+            const rect = el.getBoundingClientRect();
+            const cardWidth = 320;
+            const cardHeight = 360;
+
+            let top = rect.bottom + 10;
+            let left = rect.left - 20;
+
+            // Flip above if reaching bottom of viewport
+            if (top + cardHeight > window.innerHeight) {
+                top = Math.max(12, rect.top - cardHeight - 10);
+            }
+
+            // Bounded inside viewport horizontally
+            if (left + cardWidth > window.innerWidth - 16) {
+                left = window.innerWidth - cardWidth - 16;
+            }
+            if (left < 16) left = 16;
+
+            hoverCard.style.top = `${top}px`;
+            hoverCard.style.left = `${left}px`;
+        }
+
+        async function showUserCard(el, userId) {
+            activeTrigger = el;
+            positionHoverCard(el);
+            hoverCard.classList.remove('hidden');
+
+            if (cardCache[userId]) {
+                renderDiscordCard(cardCache[userId]);
+                requestAnimationFrame(() => hoverCard.classList.add('active'));
+            } else {
+                hoverCard.innerHTML = `
+                    <div class="h-20 bg-gradient-to-r from-blue-700/60 to-indigo-800/60 animate-pulse"></div>
+                    <div class="p-4 pt-10 text-center text-xs text-white/50">
+                        <i class="fa fa-spinner fa-spin mr-1"></i> Memuat profil...
+                    </div>
+                `;
+                requestAnimationFrame(() => hoverCard.classList.add('active'));
+                try {
+                    const res = await fetch(`get_user_card.php?id=${userId}`);
+                    const data = await res.json();
+                    if (data.success) {
+                        cardCache[userId] = data.user;
+                        renderDiscordCard(data.user);
+                    } else {
+                        hoverCard.innerHTML = `<div class="p-4 text-xs text-red-300 text-center">${data.error || 'Profil tidak ditemukan.'}</div>`;
+                    }
+                } catch (err) {
+                    hoverCard.innerHTML = '<div class="p-4 text-xs text-red-300 text-center">Gagal memuat profil.</div>';
+                }
+            }
+        }
+
+        function hideHoverCard() {
+            clearTimeout(hoverTimeout);
+            hoverCard.classList.remove('active');
+            setTimeout(() => {
+                if (!hoverCard.classList.contains('active')) {
+                    hoverCard.classList.add('hidden');
+                }
+            }, 180);
+            activeTrigger = null;
+        }
+
+        // Render Discord-Style Profile Card
+        function renderDiscordCard(user) {
+            // Theme banner gradient based on role
+            let bannerGradients = {
+                'admin': 'from-purple-700 via-indigo-800 to-purple-900',
+                'dev': 'from-indigo-600 via-violet-800 to-blue-900',
+                'osis': 'from-blue-600 via-cyan-800 to-indigo-900',
+                'guru': 'from-emerald-600 via-teal-800 to-emerald-950',
+                'murid': 'from-blue-700 via-indigo-900 to-slate-900'
+            };
+            let bgGrad = bannerGradients[user.role?.toLowerCase()] || bannerGradients['murid'];
+
+            // Avatar markup
+            let avatarImg = (user.avatar && user.avatar !== 'default-avatar.jpg')
+                ? `<img src="uploads/${user.avatar}" class="w-full h-full object-cover">`
+                : `<span class="text-xl font-extrabold text-white">${user.username.charAt(0).toUpperCase()}</span>`;
+
+            // Frame overlay
+            let frameImg = user.active_frame
+                ? `<img src="assets/frames/${user.active_frame}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[128%] h-[128%] max-w-none pointer-events-none z-10 select-none" style="object-fit: contain;">`
+                : '';
+
+            // Role Badge
+            let roleBadge = '';
+            if (user.role && user.role !== 'murid') {
+                roleBadge = `<span class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-400/40">${user.role}</span>`;
+            }
+
+            // Active Perk
+            let perkBadge = '';
+            if (user.active_perk) {
+                perkBadge = `<span class="text-[10px] px-2.5 py-0.5 rounded-full font-bold border ${user.active_perk.color} inline-flex items-center gap-1 shadow-sm">${user.active_perk.label}</span>`;
+            }
+
+            // Badges list
+            let badgesHtml = '';
+            if (user.badges && user.badges.length > 0) {
+                badgesHtml = `
+                    <div class="mt-2.5 pt-2 border-t border-white/10 flex items-center gap-1.5 flex-wrap">
+                        ${user.badges.map(b => `<img src="assets/badges/${b.icon_url}" class="w-5 h-5 object-contain" title="${b.name}">`).join('')}
+                    </div>
+                `;
+            }
+
+            hoverCard.innerHTML = `
+                <!-- Discord Banner Header -->
+                <div class="h-20 bg-gradient-to-r ${bgGrad} relative p-3 flex justify-end">
+                    <div class="absolute inset-0 bg-black/10 backdrop-blur-[1px]"></div>
+                    <div class="relative z-10 flex items-center gap-1.5">
+                        ${roleBadge}
+                    </div>
+                </div>
+
+                <!-- Overlapping Avatar & Body -->
+                <div class="p-4 pt-0 relative">
+                    
+                    <!-- Avatar with Frame overlapping Banner -->
+                    <div class="relative -mt-9 mb-2 inline-block">
+                        <div class="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-tr from-blue-700 to-indigo-900 border-2 border-[#0e1329] flex items-center justify-center text-white shadow-xl">
+                            ${avatarImg}
+                        </div>
+                        ${frameImg}
+                    </div>
+
+                    <!-- User Name & Handle -->
+                    <div class="mb-2">
+                        <h4 class="font-black text-white text-base leading-tight">${user.username}</h4>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span class="text-[11px] text-white/50 font-mono">@${user.username.toLowerCase()}</span>
+                            ${perkBadge}
+                        </div>
+                    </div>
+
+                    <!-- Stats Grid (Discord Style) -->
+                    <div class="grid grid-cols-3 gap-1.5 p-2 rounded-xl bg-black/30 border border-white/10 text-center mb-3">
+                        <div>
+                            <span class="text-[9px] text-white/40 uppercase block font-bold">Reputasi</span>
+                            <span class="text-xs font-black text-amber-300">⭐ ${user.reputation_formatted}</span>
+                        </div>
+                        <div>
+                            <span class="text-[9px] text-white/40 uppercase block font-bold">Followers</span>
+                            <span class="text-xs font-black text-white">${user.followers_count}</span>
+                        </div>
+                        <div>
+                            <span class="text-[9px] text-white/40 uppercase block font-bold">Upvotes</span>
+                            <span class="text-xs font-black text-blue-300">⬆️ ${user.total_upvotes || 0}</span>
+                        </div>
+                    </div>
+
+                    ${badgesHtml}
+
+                    <!-- CTA: Kunjungi Profil -->
+                    <div class="mt-3 pt-2.5 border-t border-white/10 flex items-center gap-2">
+                        <a href="profile.php?id=${user.id}" class="w-full py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs text-center transition-all shadow-md flex items-center justify-center gap-1.5">
+                            <i class="fa fa-user text-[11px]"></i>
+                            <span>Kunjungi Profil</span>
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Attach Trigger Events (Hover + Click)
+        function initUserHoverTriggers() {
+            document.querySelectorAll('.user-hover-trigger').forEach(el => {
+                const userId = el.getAttribute('data-user-id');
+                if (!userId) return;
+
+                // 1. Mouse Enter (Desktop Hover)
+                el.addEventListener('mouseenter', () => {
+                    clearTimeout(hoverTimeout);
+                    hoverTimeout = setTimeout(() => {
+                        showUserCard(el, userId);
+                    }, 150);
+                });
+
+                // 2. Mouse Leave (Desktop Exit)
+                el.addEventListener('mouseleave', () => {
+                    clearTimeout(hoverTimeout);
+                    hoverTimeout = setTimeout(() => {
+                        if (!hoverCard.matches(':hover')) {
+                            hideHoverCard();
+                        }
+                    }, 160);
+                });
+
+                // 3. Click / Tap (Mobile & Desktop Click Friendly)
+                el.addEventListener('click', (e) => {
+                    // If target clicked is an <a> tag navigating to profile, let them see card first if on mobile
+                    if (window.innerWidth < 1024) {
+                        e.preventDefault();
+                    }
+                    clearTimeout(hoverTimeout);
+                    if (hoverCard.classList.contains('active') && activeTrigger === el) {
+                        hideHoverCard();
+                    } else {
+                        showUserCard(el, userId);
+                    }
+                });
+            });
+        }
+
+        // Card Hover Retention
+        hoverCard.addEventListener('mouseenter', () => {
+            clearTimeout(hoverTimeout);
+        });
+        hoverCard.addEventListener('mouseleave', () => {
+            hideHoverCard();
+        });
+
+        // AUTO-CLOSE ON SCROLL (Solusi anti-nyangkut)
+        window.addEventListener('scroll', () => {
+            if (hoverCard.classList.contains('active')) {
+                hideHoverCard();
+            }
+        }, { passive: true });
+
+        // CLOSE ON OUTSIDE CLICK
+        document.addEventListener('click', (e) => {
+            if (!hoverCard.contains(e.target) && !e.target.closest('.user-hover-trigger')) {
+                hideHoverCard();
+            }
+        });
+
+        // CLOSE ON ESCAPE
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') hideHoverCard();
+        });
+
+        // Initialize triggers on page load
+        initUserHoverTriggers();
+
+        // ==========================================
+        // 3. SUB-FORUM CREATION (1200 REP)
+        // ==========================================
+        function openCreateSubforumModal() {
+            document.getElementById('create-subforum-modal').classList.remove('hidden');
+        }
+        function closeCreateSubforumModal() {
+            document.getElementById('create-subforum-modal').classList.add('hidden');
+        }
+        function updateSlugPreview(val) {
+            const clean = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+            document.getElementById('sf-slug-preview').textContent = `Tautan nanti: sf/${clean || 'nama-komunitas'}`;
+        }
+
+        async function handleCreateSubforum(e) {
+            e.preventDefault();
+            const form = document.getElementById('form-create-subforum');
+            const submitBtn = document.getElementById('btn-submit-subforum');
+            const fd = new FormData(form);
+            fd.append('action', 'create_subforum');
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin mr-1"></i> Memproses...';
+            }
+
+            try {
+                const res = await fetch('subforum_action.php', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    window.location.href = `index.php?forum_id=${data.forum_id}`;
+                } else {
+                    alert(data.error || 'Gagal membuat Sub-Forum.');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fa fa-check mr-1"></i> Buat Sub-Forum & Bayar 1.200 ⭐';
+                    }
+                }
+            } catch (err) {
+                alert('Terjadi kesalahan koneksi.');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fa fa-check mr-1"></i> Buat Sub-Forum & Bayar 1.200 ⭐';
+                }
+            }
+        }
+
+        // ==========================================
+        // 4. ARCHIVE THREAD (7 Days Auto-Delete)
+        // ==========================================
+        async function archiveThread(threadId) {
+            if (!confirm('Arsipkan postingan ini? Postingan akan disembunyikan dari feed dan dihapus permanen otomatis setelah 1 minggu (7 hari).')) {
+                return;
+            }
+
+            const fd = new FormData();
+            fd.append('action', 'archive_thread');
+            fd.append('thread_id', threadId);
+
+            try {
+                const res = await fetch('subforum_action.php', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert(data.error || 'Gagal mengarsipkan.');
+                }
+            } catch (e) {
+                alert('Gagal menghubungi server.');
+            }
+        }
+
+        async function unarchiveThread(threadId) {
+            const fd = new FormData();
+            fd.append('action', 'unarchive_thread');
+            fd.append('thread_id', threadId);
+
+            try {
+                const res = await fetch('subforum_action.php', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert(data.error || 'Gagal memulihkan topik.');
+                }
+            } catch (e) {
+                alert('Gagal menghubungi server.');
+            }
+        }
+
+        // ==========================================
+        // 5. REQUEST BAN AKUN (Admin/Dev Verification)
+        // ==========================================
+        function openRequestBanModal(forumId, forumSlug) {
+            document.getElementById('ban-forum-id-val').value = forumId;
+            document.getElementById('ban-modal-forum-label').textContent = `Sub-Forum: ${forumSlug}`;
+            document.getElementById('request-ban-modal').classList.remove('hidden');
+        }
+        function closeRequestBanModal() {
+            document.getElementById('request-ban-modal').classList.add('hidden');
+        }
+
+        async function handleRequestBan(e) {
+            e.preventDefault();
+            const form = document.getElementById('form-request-ban');
+            const fd = new FormData(form);
+            fd.append('action', 'request_ban');
+
+            try {
+                const res = await fetch('subforum_action.php', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    closeRequestBanModal();
+                } else {
+                    alert(data.error || 'Gagal mengajukan ban.');
+                }
+            } catch (err) {
+                alert('Kesalahan jaringan.');
+            }
+        }
+
+        // ==========================================
+        // 6. VOTING & SHARING
+        // ==========================================
         async function handleVote(threadId, voteType, btnEl) {
             <?php if (!isset($_SESSION['user_id'])): ?>
                 alert('Silakan login terlebih dahulu untuk melakukan vote.');
@@ -642,7 +1565,6 @@ if (isset($_SESSION['user_id'])) {
             }
         }
 
-        // Share Thread
         function shareThread(id, title) {
             const url = window.location.origin + window.location.pathname.replace('index.php', '') + 'thread.php?id=' + id;
             if (navigator.clipboard) {
@@ -652,119 +1574,6 @@ if (isset($_SESSION['user_id'])) {
             } else {
                 prompt('Salin tautan topik berikut:', url);
             }
-        }
-
-        // Reddit-Style User Hover Popover
-        const hoverCard = document.getElementById('user-hover-card');
-        let hoverTimeout = null;
-        let cardCache = {};
-
-        document.querySelectorAll('.user-hover-trigger').forEach(el => {
-            el.addEventListener('mouseenter', (e) => {
-                const userId = el.getAttribute('data-user-id');
-                if (!userId) return;
-
-                clearTimeout(hoverTimeout);
-                hoverTimeout = setTimeout(async () => {
-                    const rect = el.getBoundingClientRect();
-                    hoverCard.style.top = `${Math.min(window.innerHeight - 260, rect.bottom + 8)}px`;
-                    hoverCard.style.left = `${Math.min(window.innerWidth - 310, Math.max(16, rect.left - 20))}px`;
-                    hoverCard.classList.remove('hidden');
-
-                    if (cardCache[userId]) {
-                        renderHoverCard(cardCache[userId]);
-                    } else {
-                        hoverCard.innerHTML = '<div class="py-4 text-center text-xs text-white/50"><i class="fa fa-spinner fa-spin mr-1"></i> Memuat...</div>';
-                        hoverCard.classList.remove('opacity-0');
-                        try {
-                            const res = await fetch(`get_user_card.php?id=${userId}`);
-                            const data = await res.json();
-                            if (data.success) {
-                                cardCache[userId] = data.user;
-                                renderHoverCard(data.user);
-                            }
-                        } catch (err) {
-                            hoverCard.innerHTML = '<div class="text-xs text-red-300">Gagal memuat profil.</div>';
-                        }
-                    }
-                }, 250);
-            });
-
-            el.addEventListener('mouseleave', () => {
-                clearTimeout(hoverTimeout);
-                hoverTimeout = setTimeout(() => {
-                    if (!hoverCard.matches(':hover')) {
-                        hoverCard.classList.add('opacity-0');
-                        setTimeout(() => hoverCard.classList.add('hidden'), 150);
-                    }
-                }, 150);
-            });
-        });
-
-        hoverCard.addEventListener('mouseleave', () => {
-            hoverCard.classList.add('opacity-0');
-            setTimeout(() => hoverCard.classList.add('hidden'), 150);
-        });
-
-        function renderHoverCard(user) {
-            let perksHtml = '';
-            if (user.showcase_perks && user.showcase_perks.length > 0) {
-                perksHtml = `<div class="mt-2.5 pt-2.5 border-t border-white/10">
-                    <span class="text-[9px] text-white/50 uppercase font-bold block mb-1">Etalase:</span>
-                    <div class="flex flex-wrap gap-1">
-                        ${user.showcase_perks.map(p => `<span class="text-[9px] px-2 py-0.2 rounded-full font-bold border ${p.color_class}">${p.badge_label}</span>`).join('')}
-                    </div>
-                </div>`;
-            }
-
-            let badgesHtml = '';
-            if (user.badges && user.badges.length > 0) {
-                badgesHtml = `<div class="mt-2 pt-2 border-t border-white/10 flex items-center gap-1.5">
-                    ${user.badges.map(b => `<img src="assets/badges/${b.icon_url}" class="w-5 h-5 object-contain" title="${b.name}">`).join('')}
-                </div>`;
-            }
-
-            hoverCard.innerHTML = `
-                <div class="flex items-start gap-2.5">
-                    <div class="relative inline-flex items-center justify-center w-10 h-10 shrink-0">
-                        <div class="w-full h-full rounded-full overflow-hidden bg-gradient-to-tr from-blue-700 to-indigo-900 border border-white/20 flex items-center justify-center text-white font-extrabold shadow-md">
-                            ${user.avatar && user.avatar !== 'default-avatar.jpg' ? `<img src="uploads/${user.avatar}" class="w-full h-full object-cover">` : `<span>${user.username.charAt(0).toUpperCase()}</span>`}
-                        </div>
-                        ${user.active_frame ? `<img src="assets/frames/${user.active_frame}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[124%] h-[124%] max-w-none pointer-events-none z-10" style="object-fit: contain;">` : ''}
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-1 flex-wrap">
-                            <span class="font-extrabold text-white text-xs truncate">${user.username}</span>
-                            ${user.role && user.role !== 'murid' ? `<span class="text-[8px] px-1 py-0.2 rounded font-bold uppercase bg-purple-500/20 text-purple-300 border border-purple-500/30">${user.role}</span>` : ''}
-                        </div>
-                        ${user.active_perk ? `<span class="text-[9px] px-2 py-0.2 rounded-full font-bold border ${user.active_perk.color} inline-block mt-0.5">${user.active_perk.label}</span>` : ''}
-                        <div class="text-[10px] text-amber-300 font-extrabold mt-0.5 flex items-center gap-1">
-                            <i class="fa fa-star text-amber-400"></i> ${user.reputation} Rep
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2 mt-2.5 pt-2.5 border-t border-white/10 text-center text-[10px]">
-                    <div class="p-1 rounded-lg bg-white/5">
-                        <span class="text-white/40 block text-[8px] uppercase">Followers</span>
-                        <strong class="text-white">${user.followers_count}</strong>
-                    </div>
-                    <div class="p-1 rounded-lg bg-white/5">
-                        <span class="text-white/40 block text-[8px] uppercase">Bergabung</span>
-                        <strong class="text-white">${user.joined_date}</strong>
-                    </div>
-                </div>
-
-                ${perksHtml}
-                ${badgesHtml}
-
-                <div class="mt-2.5 pt-2 border-t border-white/10 flex items-center gap-2">
-                    <a href="profile.php?id=${user.id}" class="flex-1 text-center py-1 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-[11px] transition-all">
-                        Lihat Profil
-                    </a>
-                </div>
-            `;
-            hoverCard.classList.remove('opacity-0');
         }
 
         // Notification toggle

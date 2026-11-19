@@ -105,6 +105,26 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             $alert = ['type' => 'success', 'message' => 'Akun pengguna berhasil dihapus permanen.'];
         }
     }
+
+    // 7. APPROVE SUB-FORUM BAN REQUEST
+    elseif ($action === 'approve_ban_request') {
+        $req_id = intval($_POST['request_id'] ?? 0);
+        $target_id = intval($_POST['target_user_id'] ?? 0);
+        $admin_uid = intval($_SESSION['user_id']);
+
+        $conn->query("UPDATE users SET status = 'banned' WHERE id = $target_id");
+        $conn->query("UPDATE subforum_ban_requests SET status = 'approved', reviewed_by = $admin_uid, reviewed_at = NOW() WHERE id = $req_id");
+        $alert = ['type' => 'success', 'message' => 'Pengajuan ban disetujui. Akun pengguna berhasil diblokir.'];
+    }
+
+    // 8. REJECT SUB-FORUM BAN REQUEST
+    elseif ($action === 'reject_ban_request') {
+        $req_id = intval($_POST['request_id'] ?? 0);
+        $admin_uid = intval($_SESSION['user_id']);
+
+        $conn->query("UPDATE subforum_ban_requests SET status = 'rejected', reviewed_by = $admin_uid, reviewed_at = NOW() WHERE id = $req_id");
+        $alert = ['type' => 'info', 'message' => 'Pengajuan ban ditolak.'];
+    }
 }
 
 // Filters & Search
@@ -157,6 +177,18 @@ $cnt_osis  = $conn->query("SELECT COUNT(*) as c FROM users WHERE role = 'osis'")
 $cnt_guru  = $conn->query("SELECT COUNT(*) as c FROM users WHERE role = 'guru'")->fetch_assoc()['c'] ?? 0;
 $cnt_admin = $conn->query("SELECT COUNT(*) as c FROM users WHERE role IN ('admin', 'dev')")->fetch_assoc()['c'] ?? 0;
 $cnt_ban   = $conn->query("SELECT COUNT(*) as c FROM users WHERE status = 'banned'")->fetch_assoc()['c'] ?? 0;
+
+// Pending Sub-forum Ban Requests
+$pending_ban_requests = $conn->query("
+    SELECT sbr.*, f.nama as forum_name, f.slug as forum_slug, 
+           u_req.username as requester_name, u_target.username as target_name, u_target.avatar as target_avatar
+    FROM subforum_ban_requests sbr
+    JOIN forum f ON sbr.forum_id = f.id
+    JOIN users u_req ON sbr.requested_by = u_req.id
+    JOIN users u_target ON sbr.target_user_id = u_target.id
+    WHERE sbr.status = 'pending'
+    ORDER BY sbr.created_at DESC
+");
 ?>
 
 <div class="space-y-6">
@@ -183,6 +215,54 @@ $cnt_ban   = $conn->query("SELECT COUNT(*) as c FROM users WHERE status = 'banne
             <span>Tambah Pengguna</span>
         </button>
     </div>
+
+    <!-- PENDING SUB-FORUM BAN REQUESTS (VERIFIKASI ADMIN/DEV) -->
+    <?php if ($pending_ban_requests && $pending_ban_requests->num_rows > 0): ?>
+        <div class="p-4 sm:p-5 rounded-2xl bg-red-500/10 border border-red-500/30 backdrop-blur-xl">
+            <div class="flex items-center gap-2 text-red-400 font-extrabold text-sm mb-3">
+                <i class="fa fa-user-shield text-base"></i>
+                <span>Verifikasi Pengajuan Ban dari Pemilik Sub-Forum (<?= $pending_ban_requests->num_rows ?> Antrean)</span>
+            </div>
+            <div class="space-y-3">
+                <?php while ($req = $pending_ban_requests->fetch_assoc()): ?>
+                    <div class="p-3.5 rounded-xl bg-white/5 border border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap mb-1">
+                                <span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-bold font-mono">sf/<?= htmlspecialchars($req['forum_slug']) ?></span>
+                                <span class="text-white/50">Diajukan oleh:</span>
+                                <strong class="text-white font-semibold"><?= htmlspecialchars($req['requester_name']) ?></strong>
+                                <span class="text-white/40">•</span>
+                                <span class="text-white/40 text-[11px]"><?= date('d M Y, H:i', strtotime($req['created_at'])) ?></span>
+                            </div>
+                            <p class="text-white/80">
+                                Target yang dilaporkan: <strong class="text-red-400 font-bold"><?= htmlspecialchars($req['target_name']) ?></strong>
+                            </p>
+                            <p class="text-white/60 text-[11px] mt-1 bg-black/20 p-2 rounded-lg border border-white/5 italic">
+                                "<?= nl2br(htmlspecialchars($req['reason'])) ?>"
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0 w-full md:w-auto">
+                            <form method="POST" class="inline">
+                                <input type="hidden" name="action" value="approve_ban_request">
+                                <input type="hidden" name="request_id" value="<?= $req['id'] ?>">
+                                <input type="hidden" name="target_user_id" value="<?= $req['target_user_id'] ?>">
+                                <button type="submit" onclick="return confirm('Setujui ban untuk <?= htmlspecialchars(addslashes($req['target_name'])) ?>? Akun akan diblokir.')" class="px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-md transition-all">
+                                    Setujui Ban
+                                </button>
+                            </form>
+                            <form method="POST" class="inline">
+                                <input type="hidden" name="action" value="reject_ban_request">
+                                <input type="hidden" name="request_id" value="<?= $req['id'] ?>">
+                                <button type="submit" class="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs transition-all">
+                                    Tolak
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                <?php endwhile; ?>
+            </div>
+        </div>
+    <?php endif; ?>
 
     <!-- Stats Badges -->
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">

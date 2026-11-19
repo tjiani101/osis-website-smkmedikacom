@@ -260,7 +260,7 @@ $comments_count = (int)($c_count_res->fetch_assoc()['cnt'] ?? 0);
                         <div class="liquid-glass p-4 sm:p-5 rounded-2xl flex items-center justify-between gap-4">
                             <div class="min-w-0">
                                 <div class="flex items-center gap-2 text-[10px] text-white/50 mb-1">
-                                    <span class="font-bold text-blue-300">r/<?= htmlspecialchars($th['forum_slug'] ?? 'umum') ?></span>
+                                    <span class="font-bold text-blue-300">sf/<?= htmlspecialchars($th['forum_slug'] ?? 'umum') ?></span>
                                     <span>•</span>
                                     <span><?= date('d M Y, H:i', strtotime($th['created_at'])) ?></span>
                                 </div>
