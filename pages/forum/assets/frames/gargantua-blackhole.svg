@@ -1,0 +1,296 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Accretion Disk Fiery Plasma Gradients -->
+    <linearGradient id="plasmaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="12%" stop-color="#fffbeb" />
+      <stop offset="28%" stop-color="#fef08a" />
+      <stop offset="50%" stop-color="#fb923c" />
+      <stop offset="78%" stop-color="#ea580c" />
+      <stop offset="100%" stop-color="#7c2d12" />
+    </linearGradient>
+
+    <!-- Relativistic Doppler Beaming Gradient (Approaching side blazingly bright) -->
+    <linearGradient id="beamingGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+      <stop offset="25%" stop-color="#fff7ed" stop-opacity="0.95" />
+      <stop offset="50%" stop-color="#fed7aa" stop-opacity="0.9" />
+      <stop offset="75%" stop-color="#f97316" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#9a3412" stop-opacity="0.5" />
+    </linearGradient>
+
+    <!-- Front Accretion Belt Gradient -->
+    <linearGradient id="frontBeltGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+      <stop offset="22%" stop-color="#fffbeb" stop-opacity="0.98" />
+      <stop offset="48%" stop-color="#fed7aa" stop-opacity="0.92" />
+      <stop offset="75%" stop-color="#f97316" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#7c2d12" stop-opacity="0.3" />
+    </linearGradient>
+
+    <!-- Gravitational Lensing Upper Arch Gradient -->
+    <linearGradient id="lensingArchGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="25%" stop-color="#fef08a" />
+      <stop offset="60%" stop-color="#fb923c" />
+      <stop offset="100%" stop-color="#9a3412" />
+    </linearGradient>
+
+    <!-- Glowing Filters -->
+    <filter id="bhIntenseGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5.5" result="blur1" />
+      <feGaussianBlur stdDeviation="2" result="blur2" />
+      <feMerge>
+        <feMergeNode in="blur1" />
+        <feMergeNode in="blur2" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="bhDeepGlow" x="-35%" y="-35%" width="170%" height="170%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <style>
+      /* Main Outer Ring Animations */
+      @keyframes outerStreamSpin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      @keyframes outerCounterSpin {
+        0% { transform: rotate(360deg); }
+        100% { transform: rotate(0deg); }
+      }
+      @keyframes orbitEndurance {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      @keyframes cosmicPulse {
+        0%, 100% { opacity: 0.85; filter: drop-shadow(0 0 10px rgba(249, 115, 22, 0.7)); }
+        50% { opacity: 1; filter: drop-shadow(0 0 24px rgba(254, 215, 170, 0.98)); }
+      }
+
+      /* Gargantua Accretion Dynamics */
+      @keyframes bhHaloBreathe {
+        0%, 100% { opacity: 0.82; transform: scale(0.97); }
+        50% { opacity: 1; transform: scale(1.05); }
+      }
+      @keyframes bhPhotonFlicker {
+        0%, 100% { opacity: 0.88; stroke-width: 3.5px; filter: drop-shadow(0 0 8px #ffffff); }
+        50% { opacity: 1; stroke-width: 5.5px; filter: drop-shadow(0 0 16px #fef08a); }
+      }
+      @keyframes streamFlow {
+        0% { stroke-dashoffset: 0; }
+        100% { stroke-dashoffset: -180; }
+      }
+      @keyframes jetFlash {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 0.9; }
+      }
+
+      .spin-outer {
+        transform-origin: 256px 256px;
+        animation: outerStreamSpin 18s linear infinite;
+      }
+      .spin-counter {
+        transform-origin: 256px 256px;
+        animation: outerCounterSpin 24s linear infinite;
+      }
+      .endurance-orbit {
+        transform-origin: 256px 256px;
+        animation: orbitEndurance 20s linear infinite;
+      }
+      .pulse-cosmic {
+        animation: cosmicPulse 3.5s ease-in-out infinite;
+      }
+      .bh-halo-breathe {
+        transform-origin: 0px 0px;
+        animation: bhHaloBreathe 3s ease-in-out infinite;
+      }
+      .bh-photon-ring {
+        animation: bhPhotonFlicker 1.6s ease-in-out infinite;
+      }
+      .suction-tail {
+        animation: streamFlow 2.2s linear infinite;
+      }
+      .relativistic-jet {
+        animation: jetFlash 2s ease-in-out infinite;
+      }
+    </style>
+  </defs>
+
+  <!-- ======================================================== -->
+  <!-- 1. DEEP SPACE TIME-DILATION GEODESIC CURVATURE          -->
+  <!-- Subtle cosmic background distortion lines                -->
+  <!-- ======================================================== -->
+  <g opacity="0.3" stroke="url(#plasmaGrad)" stroke-width="0.8" fill="none">
+    <path d="M 256 20 C 340 60, 420 180, 420 360" stroke-dasharray="6 12" />
+    <path d="M 20 256 C 60 340, 180 420, 360 420" stroke-dasharray="6 12" />
+  </g>
+
+  <!-- ======================================================== -->
+  <!-- 2. OUTER CIRCULAR BOUNDARY FRAME (CENTER IS 100% CLEAR)  -->
+  <!-- Radius 236 with multi-layered plasma glow rings          -->
+  <!-- ======================================================== -->
+  <!-- Outer Cosmic Boundary Rings -->
+  <circle cx="256" cy="256" r="236" fill="none" stroke="url(#plasmaGrad)" stroke-width="7" class="pulse-cosmic" filter="url(#bhIntenseGlow)" />
+  <circle cx="256" cy="256" r="240" fill="none" stroke="#fffbeb" stroke-width="1.8" opacity="0.8" />
+  <circle cx="256" cy="256" r="226" fill="none" stroke="#fed7aa" stroke-width="1.5" stroke-dasharray="12 24" opacity="0.8" />
+  <circle cx="256" cy="256" r="220" fill="none" stroke="#ea580c" stroke-width="2" opacity="0.6" />
+
+  <!-- Outer Rotating Plasma Streams -->
+  <g class="spin-outer" filter="url(#bhIntenseGlow)" opacity="0.9">
+    <circle cx="256" cy="256" r="234" fill="none" stroke="url(#plasmaGrad)" stroke-width="3.5" stroke-dasharray="35 45 95 40" stroke-linecap="round"/>
+    <!-- Orbiting Energy Stars / Hotspots -->
+    <circle cx="256" cy="22" r="4.5" fill="#ffffff" />
+    <circle cx="490" cy="256" r="3.5" fill="#fef08a" />
+    <circle cx="22" cy="256" r="4" fill="#ffffff" />
+    <circle cx="90" cy="90" r="3" fill="#fed7aa" />
+  </g>
+
+  <g class="spin-counter" opacity="0.75" filter="url(#bhIntenseGlow)">
+    <circle cx="256" cy="256" r="240" fill="none" stroke="#f97316" stroke-width="2.2" stroke-dasharray="20 70 45 80" stroke-linecap="round"/>
+    <circle cx="390" cy="85" r="3" fill="#fef08a" />
+    <circle cx="110" cy="405" r="2.8" fill="#ffffff" />
+  </g>
+
+  <!-- Infalling Relativistic Plasma Streams flowing towards Gargantua -->
+  <g filter="url(#bhIntenseGlow)">
+    <path d="M 235 492 C 295 492, 345 460, 395 395" fill="none" stroke="url(#beamingGrad)" stroke-width="4.5" stroke-dasharray="22 16" class="suction-tail" stroke-linecap="round"/>
+    <path d="M 492 235 C 492 295, 460 345, 395 395" fill="none" stroke="url(#plasmaGrad)" stroke-width="4" stroke-dasharray="26 20" class="suction-tail" stroke-linecap="round"/>
+    <path d="M 170 475 C 260 485, 330 450, 385 410" fill="none" stroke="#fef08a" stroke-width="1.8" stroke-dasharray="14 18" class="suction-tail" stroke-linecap="round" opacity="0.75"/>
+  </g>
+
+  <!-- ======================================================== -->
+  <!-- 3. ENDURANCE SPACECRAFT ORBIT (INTERSTELLAR EASTER EGG)   -->
+  <!-- 12 module pods in a ring with mini Ranger shuttle         -->
+  <!-- ======================================================== -->
+  <g class="endurance-orbit">
+    <!-- Main Endurance Ship (Ring of 12 Habitat Pods) -->
+    <g transform="translate(425, 95) scale(0.68)" filter="url(#bhIntenseGlow)">
+      <circle cx="0" cy="0" r="14" fill="none" stroke="#e2e8f0" stroke-width="1.8" opacity="0.6"/>
+      <rect x="-3" y="-17" width="6" height="5" rx="1" fill="#ffffff" stroke="#0f172a" stroke-width="0.5"/>
+      <rect x="5" y="-15" width="6" height="5" rx="1" fill="#ffffff" stroke="#0f172a" stroke-width="0.5" transform="rotate(30 8 -12)"/>
+      <rect x="11" y="-9" width="6" height="5" rx="1" fill="#ffffff" stroke="#0f172a" stroke-width="0.5" transform="rotate(60 14 -6)"/>
+      <rect x="13" y="-2" width="6" height="5" rx="1" fill="#ffffff" stroke="#0f172a" stroke-width="0.5"/>
+      <rect x="11" y="5" width="6" height="5" rx="1" fill="#ffffff" stroke="#0f172a" stroke-width="0.5" transform="rotate(120 14 7)"/>
+      <rect x="5" y="11" width="6" height="5" rx="1" fill="#ffffff" stroke="#0f172a" stroke-width="0.5" transform="rotate(150 8 13)"/>
+      <rect x="-3" y="13" width="6" height="5" rx="1" fill="#ffffff" stroke="#0f172a" stroke-width="0.5"/>
+      <rect x="-11" y="11" width="6" height="5" rx="1" fill="#ffffff" stroke="#0f172a" stroke-width="0.5" transform="rotate(210 -8 13)"/>
+      <rect x="-17" y="5" width="6" height="5" rx="1" fill="#ffffff" stroke="#0f172a" stroke-width="0.5" transform="rotate(240 -14 7)"/>
+      <rect x="-19" y="-2" width="6" height="5" rx="1" fill="#ffffff" stroke="#0f172a" stroke-width="0.5"/>
+      <rect x="-17" y="-9" width="6" height="5" rx="1" fill="#ffffff" stroke="#0f172a" stroke-width="0.5" transform="rotate(300 -14 -6)"/>
+      <rect x="-11" y="-15" width="6" height="5" rx="1" fill="#ffffff" stroke="#0f172a" stroke-width="0.5" transform="rotate(330 -8 -12)"/>
+      <circle cx="0" cy="0" r="4" fill="#38bdf8" />
+      <circle cx="0" cy="0" r="2" fill="#ffffff" />
+      <line x1="-15" y1="18" x2="-25" y2="28" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+    </g>
+
+    <!-- Escort Ranger Shuttle Craft -->
+    <g transform="translate(442, 118) scale(0.4)" filter="url(#bhIntenseGlow)">
+      <polygon points="0,-12 6,8 0,5 -6,8" fill="#ffffff" stroke="#0f172a" stroke-width="1"/>
+      <line x1="0" y1="5" x2="0" y2="12" stroke="#38bdf8" stroke-width="2"/>
+    </g>
+  </g>
+
+  <!-- ======================================================== -->
+  <!-- 4. TOP SCI-FI CREST: "SINGULARITY // GARGANTUA"         -->
+  <!-- ======================================================== -->
+  <g transform="translate(256, 36)" filter="url(#bhIntenseGlow)">
+    <rect x="-64" y="-13" width="128" height="24" rx="12" fill="#090d16" stroke="url(#plasmaGrad)" stroke-width="2.2"/>
+    <rect x="-56" y="-11" width="112" height="2" rx="1" fill="#fef08a" opacity="0.8"/>
+    <text x="0" y="3.5" fill="#fff7ed" font-size="10.5" font-family="'Plus Jakarta Sans', Impact, monospace, sans-serif" font-weight="900" text-anchor="middle" letter-spacing="3.5">
+      SINGULARITY
+    </text>
+    <circle cx="-52" cy="0" r="2.5" fill="#38bdf8" />
+    <circle cx="52" cy="0" r="2.5" fill="#38bdf8" />
+  </g>
+
+  <!-- ======================================================== -->
+  <!-- 5. PROMINENT GARGANTUA BLACK HOLE (BOTTOM-RIGHT CORNER)   -->
+  <!-- Center: (395, 395) - Clean, symmetrical, NO OBTRUSIONS   -->
+  <!-- ======================================================== -->
+  <g transform="translate(395, 395)">
+
+    <!-- Background Space-Warping Soft Halo Glow (Subtle & Compact) -->
+    <circle cx="0" cy="0" r="78" fill="url(#plasmaGrad)" opacity="0.22" filter="url(#bhDeepGlow)" class="bh-halo-breathe" />
+
+    <!-- A. RELATIVISTIC VERTICAL JETS (SUBTLE SCI-FI FLUX) -->
+    <g class="relativistic-jet" opacity="0.75" filter="url(#bhIntenseGlow)">
+      <line x1="0" y1="-35" x2="0" y2="-75" stroke="url(#beamingGrad)" stroke-width="2" stroke-linecap="round" />
+      <line x1="0" y1="35" x2="0" y2="75" stroke="url(#plasmaGrad)" stroke-width="1.8" stroke-linecap="round" />
+    </g>
+
+    <!-- B. UPPER GRAVITATIONAL LENSING ARC (Warped accretion light bent above shadow) -->
+    <g class="bh-halo-breathe" filter="url(#bhIntenseGlow)">
+      <!-- Outer wide warm glow -->
+      <path d="M -75 0 C -75 -55, 75 -55, 75 0" fill="none" stroke="url(#beamingGrad)" stroke-width="11" stroke-linecap="round" opacity="0.85"/>
+      <!-- Inner brilliant core arch -->
+      <path d="M -68 0 C -68 -48, 68 -48, 68 0" fill="none" stroke="url(#lensingArchGrad)" stroke-width="4.5" stroke-linecap="round"/>
+      <!-- Blinding white photon highlight crest -->
+      <path d="M -56 0 C -56 -40, 56 -40, 56 0" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.95"/>
+    </g>
+
+    <!-- C. LOWER GRAVITATIONAL LENSING ARC (Underneath shadow) -->
+    <g class="bh-halo-breathe" filter="url(#bhIntenseGlow)" opacity="0.88">
+      <path d="M -68 0 C -68 46, 68 46, 68 0" fill="none" stroke="url(#plasmaGrad)" stroke-width="7.5" stroke-linecap="round"/>
+      <path d="M -58 0 C -58 38, 58 38, 58 0" fill="none" stroke="#fef08a" stroke-width="2.5" stroke-linecap="round"/>
+    </g>
+
+    <!-- D. ACTIVELY ANIMATED SWIRLING ACCRETION MATTER (NON-STATIC!) -->
+    <!-- Clockwise Swirling Hot Plasma Rings -->
+    <g filter="url(#bhIntenseGlow)">
+      <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="6.5s" repeatCount="indefinite" />
+      <circle cx="0" cy="0" r="78" fill="none" stroke="url(#plasmaGrad)" stroke-width="6.5" stroke-dasharray="35 30 75 38" stroke-linecap="round" />
+      <circle cx="0" cy="0" r="64" fill="none" stroke="#fef08a" stroke-width="2.5" stroke-dasharray="25 38 48 35" stroke-linecap="round" />
+      <!-- Swirling Plasma Energy Nodes -->
+      <circle cx="74" cy="0" r="4.5" fill="#ffffff" />
+      <circle cx="-60" cy="20" r="3.5" fill="#fde047" />
+      <circle cx="14" cy="-70" r="4" fill="#fb923c" />
+      <circle cx="-14" cy="70" r="3" fill="#ffffff" />
+    </g>
+
+    <!-- Counter-Spinning Inner Gas Filaments -->
+    <g filter="url(#bhIntenseGlow)" opacity="0.8">
+      <animateTransform attributeName="transform" type="rotate" from="360 0 0" to="0 0 0" dur="10s" repeatCount="indefinite" />
+      <circle cx="0" cy="0" r="70" fill="none" stroke="#fdba74" stroke-width="3" stroke-dasharray="18 42 38 48" stroke-linecap="round" />
+      <circle cx="0" cy="0" r="52" fill="none" stroke="#ea580c" stroke-width="4" stroke-dasharray="20 28 32 25" stroke-linecap="round" />
+      <circle cx="-48" cy="-34" r="3" fill="#ffffff" />
+      <circle cx="46" cy="38" r="3" fill="#fff7ed" />
+    </g>
+
+    <!-- E. RELATIVISTIC EQUATORIAL ACCRETION DISK (BEAM CROSSING FRONT) -->
+    <!-- Back Disk Horizon Behind Shadow -->
+    <g filter="url(#bhIntenseGlow)">
+      <path d="M -82 0 Q 0 -15 82 0" fill="none" stroke="url(#beamingGrad)" stroke-width="8.5" stroke-linecap="round" opacity="0.9"/>
+      <path d="M -75 0 Q 0 -10 75 0" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+    </g>
+
+    <!-- F. PHOTON SPHERE & EVENT HORIZON SHADOW CORE -->
+    <!-- Blinding Photon Ring Shimmering -->
+    <circle cx="0" cy="0" r="37" fill="none" stroke="#ffffff" stroke-width="3.5" class="bh-photon-ring" filter="url(#bhIntenseGlow)" />
+    <circle cx="0" cy="0" r="35" fill="none" stroke="#fdba74" stroke-width="2.2" opacity="0.95" />
+
+    <!-- True Pitch-Black Event Horizon (Gargantua Singularity Shadow) -->
+    <circle cx="0" cy="0" r="33" fill="#000000" stroke="#050302" stroke-width="2" />
+
+    <!-- G. EQUATORIAL FRONT BELT (Relativistic Disk Passing In Front of Shadow) -->
+    <!-- Clean, tapered front belt with NO BULGING DISCS OR TUMORS -->
+    <g filter="url(#bhIntenseGlow)">
+      <path d="M -85 0 Q 0 20 85 0" fill="none" stroke="url(#frontBeltGrad)" stroke-width="9.5" stroke-linecap="round"/>
+      <path d="M -78 0 Q 0 15 78 0" fill="none" stroke="#fffbeb" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M -68 0 Q 0 11 68 0" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>
+    </g>
+
+    <!-- H. GARGANTUA BADGE LABEL BENEATH THE BLACK HOLE -->
+    <g transform="translate(0, 64)" filter="url(#bhIntenseGlow)">
+      <rect x="-48" y="-10" width="96" height="20" rx="10" fill="#090d16" stroke="url(#plasmaGrad)" stroke-width="1.8"/>
+      <text x="0" y="3.5" fill="#fff7ed" font-size="9.5" font-family="'Plus Jakarta Sans', Impact, monospace, sans-serif" font-weight="900" text-anchor="middle" letter-spacing="2.8">
+        GARGANTUA
+      </text>
+    </g>
+
+  </g>
+
+</svg>
