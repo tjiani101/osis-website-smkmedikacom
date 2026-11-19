@@ -989,7 +989,7 @@ if ($current_subforum && isset($_SESSION['user_id'])) {
     <!-- ============================================================== -->
     <!-- DISCORD-STYLE USER HOVER & CLICK CARD (POPOVER)                 -->
     <!-- ============================================================== -->
-    <div id="user-hover-card" class="fixed z-50 hidden liquid-glass p-0 rounded-2xl border border-white/20 shadow-2xl w-80 pointer-events-auto backdrop-blur-2xl opacity-0 overflow-hidden text-white"></div>
+    <div id="user-hover-card" class="fixed z-50 hidden bg-[#111215]/95 backdrop-blur-2xl p-0 rounded-3xl border border-white/15 shadow-2xl shadow-black/80 w-80 pointer-events-auto opacity-0 overflow-hidden text-white"></div>
 
     <!-- ============================================================== -->
     <!-- MODAL: BUAT SUB-FORUM (Cost 1200 Rep)                          -->
@@ -1231,101 +1231,107 @@ if ($current_subforum && isset($_SESSION['user_id'])) {
             activeTrigger = null;
         }
 
-        // Render Discord-Style Profile Card
+        // Render Discord-Style Profile Card (Deep dark solid style matching Discord Nitro)
         function renderDiscordCard(user) {
             // Theme banner gradient based on role
             let bannerGradients = {
-                'admin': 'from-purple-700 via-indigo-800 to-purple-900',
-                'dev': 'from-indigo-600 via-violet-800 to-blue-900',
-                'osis': 'from-blue-600 via-cyan-800 to-indigo-900',
-                'guru': 'from-emerald-600 via-teal-800 to-emerald-950',
-                'murid': 'from-blue-700 via-indigo-900 to-slate-900'
+                'admin': 'from-[#2b0c47] via-[#591b8a] to-[#210938]',
+                'dev': 'from-[#191040] via-[#3d1c82] to-[#1c1240]',
+                'osis': 'from-[#0b2246] via-[#1d4ed8] to-[#171c42]',
+                'guru': 'from-[#064234] via-[#047857] to-[#042a22]',
+                'murid': 'from-[#1a1b2e] via-[#2d2f4d] to-[#141524]'
             };
             let bgGrad = bannerGradients[user.role?.toLowerCase()] || bannerGradients['murid'];
 
             // Avatar markup
             let avatarImg = (user.avatar && user.avatar !== 'default-avatar.jpg')
                 ? `<img src="uploads/${user.avatar}" class="w-full h-full object-cover">`
-                : `<span class="text-xl font-extrabold text-white">${user.username.charAt(0).toUpperCase()}</span>`;
+                : `<span class="text-2xl font-black text-white">${user.username.charAt(0).toUpperCase()}</span>`;
 
             // Frame overlay
             let frameImg = user.active_frame
                 ? `<img src="assets/frames/${user.active_frame}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[128%] h-[128%] max-w-none pointer-events-none z-10 select-none" style="object-fit: contain;">`
                 : '';
 
-            // Role Badge
+            // Role Badge (in top right of banner)
             let roleBadge = '';
             if (user.role && user.role !== 'murid') {
-                roleBadge = `<span class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-400/40">${user.role}</span>`;
+                roleBadge = `<span class="text-[10px] px-3 py-1 rounded-full font-extrabold uppercase tracking-wider bg-black/40 text-blue-300 border border-blue-400/40 backdrop-blur-md shadow-sm">${user.role}</span>`;
             }
 
             // Active Perk
             let perkBadge = '';
             if (user.active_perk) {
-                perkBadge = `<span class="text-[10px] px-2.5 py-0.5 rounded-full font-bold border ${user.active_perk.color} inline-flex items-center gap-1 shadow-sm">${user.active_perk.label}</span>`;
+                perkBadge = `<span class="text-[11px] px-2.5 py-0.5 rounded-full font-bold border ${user.active_perk.color} inline-flex items-center gap-1 shadow-sm">${user.active_perk.label}</span>`;
             }
 
-            // Badges list
+            // Badges list (Circle icons like in image 2)
             let badgesHtml = '';
             if (user.badges && user.badges.length > 0) {
                 badgesHtml = `
-                    <div class="mt-2.5 pt-2 border-t border-white/10 flex items-center gap-1.5 flex-wrap">
-                        ${user.badges.map(b => `<img src="assets/badges/${b.icon_url}" class="w-5 h-5 object-contain" title="${b.name}">`).join('')}
+                    <div class="pt-3 border-t border-white/10 flex items-center gap-2 flex-wrap mb-3.5">
+                        ${user.badges.map(b => `
+                            <div class="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center p-1.5 shadow-sm hover:scale-110 transition-transform cursor-pointer" title="${b.name}">
+                                <img src="assets/badges/${b.icon_url}" class="w-full h-full object-contain">
+                            </div>
+                        `).join('')}
                     </div>
                 `;
             }
 
             hoverCard.innerHTML = `
                 <!-- Discord Banner Header -->
-                <div class="h-20 bg-gradient-to-r ${bgGrad} relative p-3 flex justify-end">
-                    <div class="absolute inset-0 bg-black/10 backdrop-blur-[1px]"></div>
-                    <div class="relative z-10 flex items-center gap-1.5">
+                <div class="h-24 bg-gradient-to-r ${bgGrad} relative p-3 flex justify-end items-start">
+                    <div class="absolute inset-0 bg-black/15"></div>
+                    <div class="relative z-10">
                         ${roleBadge}
                     </div>
                 </div>
 
-                <!-- Overlapping Avatar & Body -->
-                <div class="p-4 pt-0 relative">
+                <!-- Lower Card Container (Deep dark / a bit transparent) -->
+                <div class="bg-[#121316] px-4 pb-4 pt-0 relative">
                     
-                    <!-- Avatar with Frame overlapping Banner -->
-                    <div class="relative -mt-9 mb-2 inline-block">
-                        <div class="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-tr from-blue-700 to-indigo-900 border-2 border-[#0e1329] flex items-center justify-center text-white shadow-xl">
+                    <!-- Avatar with Thick Border overlapping Banner -->
+                    <div class="relative -mt-12 mb-2 inline-block">
+                        <div class="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-tr from-blue-700 to-indigo-900 border-[5px] border-[#121316] flex items-center justify-center text-white shadow-2xl">
                             ${avatarImg}
                         </div>
                         ${frameImg}
                     </div>
 
                     <!-- User Name & Handle -->
-                    <div class="mb-2">
-                        <h4 class="font-black text-white text-base leading-tight">${user.username}</h4>
-                        <div class="flex items-center gap-2 mt-0.5">
-                            <span class="text-[11px] text-white/50 font-mono">@${user.username.toLowerCase()}</span>
+                    <div class="mb-3">
+                        <h4 class="font-black text-white text-lg leading-tight tracking-tight">${user.username}</h4>
+                        <div class="flex items-center gap-2 mt-1 flex-wrap">
+                            <span class="text-xs text-white/50 font-mono">@${user.username.toLowerCase()}</span>
                             ${perkBadge}
                         </div>
                     </div>
 
-                    <!-- Stats Grid (Discord Style) -->
-                    <div class="grid grid-cols-3 gap-1.5 p-2 rounded-xl bg-black/30 border border-white/10 text-center mb-3">
+                    <!-- Stats Box (Dark Discord Style) -->
+                    <div class="grid grid-cols-3 gap-2 p-3 rounded-2xl bg-[#1a1b20] border border-white/5 text-center mb-3.5 shadow-inner">
                         <div>
-                            <span class="text-[9px] text-white/40 uppercase block font-bold">Reputasi</span>
-                            <span class="text-xs font-black text-amber-300">⭐ ${user.reputation_formatted}</span>
+                            <span class="text-[9px] text-white/40 uppercase block font-extrabold tracking-wider mb-0.5">Reputasi</span>
+                            <span class="text-xs font-black text-amber-300 flex items-center justify-center gap-1">⭐ ${user.reputation_formatted}</span>
                         </div>
                         <div>
-                            <span class="text-[9px] text-white/40 uppercase block font-bold">Followers</span>
+                            <span class="text-[9px] text-white/40 uppercase block font-extrabold tracking-wider mb-0.5">Followers</span>
                             <span class="text-xs font-black text-white">${user.followers_count}</span>
                         </div>
                         <div>
-                            <span class="text-[9px] text-white/40 uppercase block font-bold">Upvotes</span>
-                            <span class="text-xs font-black text-blue-300">⬆️ ${user.total_upvotes || 0}</span>
+                            <span class="text-[9px] text-white/40 uppercase block font-extrabold tracking-wider mb-0.5">Upvotes</span>
+                            <span class="text-xs font-black text-blue-300 flex items-center justify-center gap-0.5">
+                                <span class="px-1 py-0.2 rounded bg-blue-500/20 text-[10px] font-bold">⬆️</span> ${user.total_upvotes || 0}
+                            </span>
                         </div>
                     </div>
 
                     ${badgesHtml}
 
                     <!-- CTA: Kunjungi Profil -->
-                    <div class="mt-3 pt-2.5 border-t border-white/10 flex items-center gap-2">
-                        <a href="profile.php?id=${user.id}" class="w-full py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs text-center transition-all shadow-md flex items-center justify-center gap-1.5">
-                            <i class="fa fa-user text-[11px]"></i>
+                    <div>
+                        <a href="profile.php?id=${user.id}" class="w-full py-2.5 rounded-2xl bg-[#5865F2] hover:bg-[#4752C4] text-white font-extrabold text-xs text-center transition-all shadow-lg shadow-indigo-900/40 flex items-center justify-center gap-2">
+                            <i class="fa fa-user text-xs"></i>
                             <span>Kunjungi Profil</span>
                         </a>
                     </div>
