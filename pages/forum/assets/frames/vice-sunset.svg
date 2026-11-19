@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- GTA VI Iconic Vice Sunset Gradient -->
+    <linearGradient id="viceSunset" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff007f" />
+      <stop offset="35%" stop-color="#ec4899" />
+      <stop offset="70%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+
+    <!-- Neon Sun / Horizon Gradient -->
+    <linearGradient id="sunGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="45%" stop-color="#f97316" />
+      <stop offset="100%" stop-color="#ec4899" />
+    </linearGradient>
+
+    <!-- VI Metallic / Neon Gradient -->
+    <linearGradient id="viGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="30%" stop-color="#fef08a" />
+      <stop offset="65%" stop-color="#ff007f" />
+      <stop offset="100%" stop-color="#8b5cf6" />
+    </linearGradient>
+
+    <!-- Glowing effect -->
+    <filter id="viceGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="strongGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="12" result="blur1" />
+      <feGaussianBlur stdDeviation="4" result="blur2" />
+      <feMerge>
+        <feMergeNode in="blur1" />
+        <feMergeNode in="blur2" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Outer Neon Ring with Vice City Sunset Colors -->
+  <circle cx="256" cy="256" r="236" fill="none" stroke="url(#viceSunset)" stroke-width="12" filter="url(#strongGlow)" />
+  <circle cx="256" cy="256" r="226" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.6" stroke-dasharray="12 24" />
+
+  <!-- Retro Sun Stripes behind top edge -->
+  <g opacity="0.85" filter="url(#viceGlow)">
+    <path d="M 170 54 Q 256 24 342 54" fill="none" stroke="url(#sunGrad)" stroke-width="4.5" stroke-linecap="round"/>
+    <path d="M 190 68 Q 256 44 322 68" fill="none" stroke="url(#sunGrad)" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M 210 82 Q 256 62 302 82" fill="none" stroke="url(#sunGrad)" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Top "VI" Centerpiece (GTA VI Style) -->
+  <g transform="translate(256, 44)" filter="url(#strongGlow)">
+    <!-- Shadow / Outer Stroke for Contrast -->
+    <text x="0" y="6" fill="#090d1f" font-size="46" font-family="'Plus Jakarta Sans', 'Arial Black', Impact, sans-serif" font-weight="900" text-anchor="middle" font-style="italic" letter-spacing="4" stroke="#090d1f" stroke-width="9" stroke-linejoin="round">
+      VI
+    </text>
+    <!-- Neon Magenta Outline -->
+    <text x="0" y="6" fill="none" font-size="46" font-family="'Plus Jakarta Sans', 'Arial Black', Impact, sans-serif" font-weight="900" text-anchor="middle" font-style="italic" letter-spacing="4" stroke="url(#viceSunset)" stroke-width="5" stroke-linejoin="round">
+      VI
+    </text>
+    <!-- Sun/Gold Gradient Core -->
+    <text x="0" y="6" fill="url(#viGrad)" font-size="46" font-family="'Plus Jakarta Sans', 'Arial Black', Impact, sans-serif" font-weight="900" text-anchor="middle" font-style="italic" letter-spacing="4" stroke="#ffffff" stroke-width="1">
+      VI
+    </text>
+  </g>
+
+  <!-- Tropical Palm Tree Silhouette - Left -->
+  <g transform="translate(68, 380) scale(0.95)" fill="#111827" filter="url(#viceGlow)">
+    <!-- Palm Trunk -->
+    <path d="M 12 70 Q 25 20 20 -20 Q 15 -22 10 -20 Q 12 20 4 70 Z" fill="#0f172a" stroke="#ec4899" stroke-width="1.5"/>
+    <!-- Fronds -->
+    <path d="M 20 -20 Q -15 -45 -35 -25 Q -10 -28 15 -18 Z" fill="#0f172a" stroke="#06b6d4" stroke-width="1"/>
+    <path d="M 20 -20 Q -5 -65 15 -55 Q 12 -40 20 -18 Z" fill="#0f172a" stroke="#ec4899" stroke-width="1"/>
+    <path d="M 20 -20 Q 45 -65 40 -40 Q 30 -32 20 -18 Z" fill="#0f172a" stroke="#f43f5e" stroke-width="1"/>
+    <path d="M 20 -20 Q 60 -35 50 -15 Q 35 -20 20 -18 Z" fill="#0f172a" stroke="#06b6d4" stroke-width="1"/>
+  </g>
+
+  <!-- Tropical Palm Tree Silhouette - Right -->
+  <g transform="translate(444, 380) scale(-0.85, 0.85)" fill="#111827" filter="url(#viceGlow)">
+    <!-- Palm Trunk -->
+    <path d="M 12 70 Q 25 20 20 -20 Q 15 -22 10 -20 Q 12 20 4 70 Z" fill="#0f172a" stroke="#06b6d4" stroke-width="1.5"/>
+    <!-- Fronds -->
+    <path d="M 20 -20 Q -15 -45 -35 -25 Q -10 -28 15 -18 Z" fill="#0f172a" stroke="#ec4899" stroke-width="1"/>
+    <path d="M 20 -20 Q -5 -65 15 -55 Q 12 -40 20 -18 Z" fill="#0f172a" stroke="#f43f5e" stroke-width="1"/>
+    <path d="M 20 -20 Q 45 -65 40 -40 Q 30 -32 20 -18 Z" fill="#0f172a" stroke="#06b6d4" stroke-width="1"/>
+  </g>
+
+  <!-- Neon Star Sparkles -->
+  <g filter="url(#strongGlow)">
+    <polygon points="100,100 103,92 111,90 103,88 100,80 97,88 89,90 97,92" fill="#06b6d4" />
+    <polygon points="412,120 415,114 421,112 415,110 412,104 409,110 403,112 409,114" fill="#ff007f" />
+    <polygon points="135,32 138,24 146,22 138,20 135,12 132,20 124,22 132,24" fill="#fef08a" />
+    <polygon points="377,32 380,24 388,22 380,20 377,12 374,20 366,22 374,24" fill="#06b6d4" />
+  </g>
+
+  <!-- Bottom Badge: VICE CITY (Stylized Retro Neon) -->
+  <g transform="translate(256, 468)">
+    <!-- Neon backplate -->
+    <rect x="-78" y="-14" width="156" height="28" rx="14" fill="#090d1f" stroke="url(#viceSunset)" stroke-width="3" filter="url(#viceGlow)"/>
+    <rect x="-73" y="-10" width="146" height="20" rx="10" fill="#1e1035" opacity="0.85"/>
+    <!-- Gradient Text: VICE CITY -->
+    <text x="0" y="4" fill="url(#sunGrad)" font-size="13" font-family="'Plus Jakarta Sans', 'Arial Black', sans-serif" font-weight="900" text-anchor="middle" font-style="italic" letter-spacing="2.5" filter="url(#viceGlow)">
+      VICE CITY
+    </text>
+  </g>
+</svg>

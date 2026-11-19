@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="fireGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#b91c1c" />
+      <stop offset="50%" stop-color="#ea580c" />
+      <stop offset="85%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#fef08a" />
+    </linearGradient>
+    <filter id="fireGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <!-- Flame circle ring -->
+  <circle cx="256" cy="256" r="236" fill="none" stroke="url(#fireGrad)" stroke-width="12" filter="url(#fireGlow)"/>
+  <circle cx="256" cy="256" r="222" fill="none" stroke="#fef08a" stroke-width="2" stroke-dasharray="15 15" opacity="0.8"/>
+  <!-- Blazing Flames around Top -->
+  <g filter="url(#fireGlow)">
+    <path d="M 256 10 C 240 60 220 80 235 120 C 245 100 256 80 256 60 C 260 85 275 100 280 120 C 295 80 270 50 256 10 Z" fill="url(#fireGrad)"/>
+    <path d="M 190 35 C 180 75 170 95 185 130 C 195 110 200 95 200 80 C 208 95 215 110 220 125 C 225 90 205 60 190 35 Z" fill="url(#fireGrad)"/>
+    <path d="M 322 35 C 332 75 342 95 327 130 C 317 110 312 95 312 80 C 304 95 297 110 292 125 C 287 90 307 60 322 35 Z" fill="url(#fireGrad)"/>
+  </g>
+  <!-- Flame Embers -->
+  <circle cx="120" cy="90" r="6" fill="#f59e0b" filter="url(#fireGlow)"/>
+  <circle cx="392" cy="90" r="6" fill="#f59e0b" filter="url(#fireGlow)"/>
+  <circle cx="80" cy="180" r="4" fill="#ea580c" filter="url(#fireGlow)"/>
+  <circle cx="432" cy="180" r="4" fill="#ea580c" filter="url(#fireGlow)"/>
+  <!-- Bottom Emblem -->
+  <g transform="translate(256, 470)">
+    <polygon points="0,-18 35,0 0,18 -35,0" fill="#b91c1c" stroke="#fef08a" stroke-width="2" filter="url(#fireGlow)"/>
+    <text x="0" y="5" fill="#fff" font-size="12" font-family="sans-serif" font-weight="900" text-anchor="middle">🔥</text>
+  </g>
+</svg>

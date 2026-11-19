@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <defs>
+    <linearGradient id="donGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#eab308"/>
+      <stop offset="100%" stop-color="#ca8a04"/>
+    </linearGradient>
+  </defs>
+  <circle cx="64" cy="64" r="58" fill="url(#donGrad)" stroke="#fef08a" stroke-width="4"/>
+  <circle cx="64" cy="64" r="50" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.6"/>
+  <!-- Gold Coin with Star -->
+  <g transform="translate(64,64) scale(0.95)">
+    <circle cx="0" cy="0" r="28" fill="#ffffff"/>
+    <circle cx="0" cy="0" r="23" fill="#eab308"/>
+    <polygon points="0,-16 5,-5 16,-5 7,2 10,13 0,7 -10,13 -7,2 -16,-5 -5,-5" fill="#ffffff"/>
+  </g>
+</svg>

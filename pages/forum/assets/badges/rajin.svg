@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <defs>
+    <linearGradient id="rajinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+  <circle cx="64" cy="64" r="58" fill="url(#rajinGrad)" stroke="#fde68a" stroke-width="4"/>
+  <circle cx="64" cy="64" r="50" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.6"/>
+  <!-- Fire streak symbol -->
+  <g transform="translate(64,64) scale(0.95)">
+    <path d="M 0 -28 C 15 -10 20 5 12 18 C 5 28 -15 26 -18 14 C -20 5 -12 -5 -5 -12 C -5 -2 -1 2 4 4 C 5 -5 -2 -18 0 -28 Z" fill="#ffffff"/>
+    <path d="M 0 -10 C 8 0 10 10 5 18 C 0 24 -10 20 -10 12 C -10 5 -5 0 0 -10 Z" fill="#b45309"/>
+  </g>
+</svg>

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <style>
+      .px-pink { fill: #ff007f; }
+      .px-cyan { fill: #00f0ff; }
+      .px-yellow { fill: #ffe600; }
+      .px-purple { fill: #7928ca; }
+      .px-white { fill: #ffffff; }
+    </style>
+  </defs>
+  <!-- Pixel circle / octagon simulation with stepped pixel rects -->
+  <!-- Top and Bottom bars -->
+  <rect x="160" y="24" width="192" height="16" class="px-cyan" />
+  <rect x="144" y="40" width="224" height="16" class="px-pink" />
+  <rect x="160" y="472" width="192" height="16" class="px-cyan" />
+  <rect x="144" y="456" width="224" height="16" class="px-pink" />
+
+  <!-- Left and Right bars -->
+  <rect x="24" y="160" width="16" height="192" class="px-cyan" />
+  <rect x="40" y="144" width="16" height="224" class="px-pink" />
+  <rect x="472" y="160" width="16" height="192" class="px-cyan" />
+  <rect x="456" y="144" width="16" height="224" class="px-pink" />
+
+  <!-- Diagonal stepped pixel corners -->
+  <rect x="96" y="80" width="32" height="32" class="px-yellow" />
+  <rect x="128" y="64" width="32" height="32" class="px-cyan" />
+  <rect x="64" y="128" width="32" height="32" class="px-pink" />
+  
+  <rect x="384" y="80" width="32" height="32" class="px-yellow" />
+  <rect x="352" y="64" width="32" height="32" class="px-cyan" />
+  <rect x="416" y="128" width="32" height="32" class="px-pink" />
+
+  <rect x="96" y="400" width="32" height="32" class="px-yellow" />
+  <rect x="128" y="416" width="32" height="32" class="px-cyan" />
+  <rect x="64" y="352" width="32" height="32" class="px-pink" />
+
+  <rect x="384" y="400" width="32" height="32" class="px-yellow" />
+  <rect x="352" y="416" width="32" height="32" class="px-cyan" />
+  <rect x="416" y="352" width="32" height="32" class="px-pink" />
+
+  <!-- Pixel hearts & stars -->
+  <g transform="translate(240, 16) scale(1)">
+    <rect x="4" y="0" width="8" height="8" class="px-yellow"/>
+    <rect x="20" y="0" width="8" height="8" class="px-yellow"/>
+    <rect x="0" y="8" width="32" height="8" class="px-pink"/>
+    <rect x="4" y="16" width="24" height="8" class="px-pink"/>
+    <rect x="12" y="24" width="8" height="8" class="px-pink"/>
+  </g>
+  <!-- Pixel 8-bit Tag at bottom -->
+  <rect x="208" y="468" width="96" height="28" fill="#18181b" stroke="#00f0ff" stroke-width="4"/>
+  <text x="256" y="488" fill="#ffe600" font-size="14" font-family="monospace" font-weight="900" text-anchor="middle">8-BIT</text>
+</svg>

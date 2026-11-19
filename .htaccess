@@ -1,0 +1,27 @@
+
+RewriteEngine On
+
+# Cegah directory listing (agar folder tidak bisa diintip isinya dari browser)
+Options -Indexes
+
+# Blokir akses langsung ke file konfigurasi database, file SQL, dan file sensitif
+<FilesMatch "(db\.php|eskul_db\.php|lombadb\.php|\.sql|\.env|\.git|\.log)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+RewriteCond %{REQUEST_URI} ^/favicon\.ico$
+RewriteRule ^favicon\.ico$ /images/favicon.ico [L]
+
+DirectoryIndex index.php index.html index.htm
+
+ErrorDocument 403 https://errors.infinityfree.net/errors/403/
+ErrorDocument 404 https://osis-medcom.web.id/404/
+ErrorDocument 500 https://errors.infinityfree.net/errors/500/
+
+php_value date.timezone Asia/Jakarta

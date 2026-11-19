@@ -1,0 +1,218 @@
+/* ==========================================================================
+   OSIS & MPK SMK MEDIKACOM - LIQUID GLASS THEME SYSTEM
+   Standardized styling matching index.html
+   ========================================================================== */
+
+/* --- CSS Variables --- */
+:root {
+    --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.05));
+    --glass-border: 1px solid rgba(255, 255, 255, 0.25);
+    --glass-border-top: 1px solid rgba(255, 255, 255, 0.5);
+    --glass-border-left: 1px solid rgba(255, 255, 255, 0.5);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25), inset 0 2px 3px rgba(255, 255, 255, 0.4), inset 0 -2px 5px rgba(0, 0, 0, 0.15);
+    --glass-radius: 24px;
+    --glass-radius-lg: 32px;
+}
+
+/* --- Base Body --- */
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100%;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: #05050f;
+    color: #ffffff;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+}
+
+/* --- Blurred Background Layer --- */
+.main-background {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    background-image: url('../../images/together.webp');
+    background-size: cover;
+    background-position: center;
+    filter: blur(14px) brightness(0.38);
+    transform: scale(1.08);
+    pointer-events: none;
+}
+
+/* Subtle dark gradient overlay on top of background */
+.main-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(circle at 50% 20%, rgba(37, 99, 235, 0.12), transparent 70%),
+                radial-gradient(circle at 80% 80%, rgba(147, 51, 234, 0.1), transparent 60%);
+    pointer-events: none;
+}
+
+/* --- Liquid Glass Container --- */
+.liquid-glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(18px) saturate(130%);
+    -webkit-backdrop-filter: blur(18px) saturate(130%);
+    box-shadow: var(--glass-shadow);
+    border: var(--glass-border);
+    border-top: var(--glass-border-top);
+    border-left: var(--glass-border-left);
+    border-radius: var(--glass-radius);
+    position: relative;
+}
+
+.liquid-glass-interactive {
+    transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.liquid-glass-interactive:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px 0 rgba(0, 0, 0, 0.35), 
+                inset 0 3px 5px rgba(255, 255, 255, 0.6), 
+                inset 0 -2px 5px rgba(0, 0, 0, 0.15),
+                0 0 25px rgba(96, 165, 250, 0.2);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.08));
+}
+
+/* --- Liquid Buttons --- */
+.liquid-btn {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(59, 130, 246, 0.85));
+    backdrop-filter: blur(10px) saturate(150%);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35), 
+                inset 0 2px 3px rgba(255, 255, 255, 0.5), 
+                inset 0 -2px 4px rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.4);
+    border-top: 1px solid rgba(255,255,255,0.7);
+    border-radius: 999px;
+    color: white;
+    font-weight: 700;
+    transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.liquid-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5), 
+                inset 0 3px 5px rgba(255, 255, 255, 0.8), 
+                inset 0 -2px 4px rgba(0,0,0,0.2);
+    background: linear-gradient(135deg, rgba(29, 78, 216, 1), rgba(37, 99, 235, 0.95));
+}
+
+.liquid-btn-secondary {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 999px;
+    color: white;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.liquid-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.45);
+    transform: translateY(-2px);
+}
+
+.liquid-btn-danger {
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.85), rgba(239, 68, 68, 0.8));
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-top: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 999px;
+    color: white;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.liquid-btn-danger:hover {
+    background: rgba(220, 38, 38, 1);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    transform: translateY(-2px);
+}
+
+/* --- Form Inputs --- */
+.liquid-input {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-top: 1px solid rgba(255, 255, 255, 0.35);
+    border-left: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 16px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.liquid-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(96, 165, 250, 0.7);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15), 0 0 20px rgba(96, 165, 250, 0.25);
+}
+
+.liquid-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* --- Badges & Pills --- */
+.liquid-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(8px);
+}
+
+/* --- Text Gradients --- */
+.text-gradient {
+    background: linear-gradient(to right, #60a5fa, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.text-gradient-purple {
+    background: linear-gradient(to right, #c084fc, #818cf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* --- Loading Spinner --- */
+.loader { 
+    border: 3px solid rgba(255, 255, 255, 0.12); 
+    border-left-color: #60a5fa; 
+    border-radius: 50%; width: 44px; height: 44px; 
+    animation: spin 0.9s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; 
+    box-shadow: 0 0 20px rgba(96, 165, 250, 0.25);
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* --- Custom Scrollbar --- */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }

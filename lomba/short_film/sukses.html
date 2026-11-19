@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendaftaran Berhasil - OSIS SMK MEDIKACOM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0a0a0a;
+            color: white;
+            overflow: hidden;
+        }
+        .bg-gradient {
+            background: radial-gradient(circle at center, #1e1b4b 0%, #020617 100%);
+        }
+        .glass-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .checkmark {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 2;
+            stroke: #22c55e;
+            stroke-miterlimit: 10;
+            margin: 10% auto;
+            box-shadow: inset 0px 0px 0px #22c55e;
+            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+        @keyframes fill { 100% { box-shadow: inset 0px 0px 0px 50px #22c55e; } }
+        @keyframes scale { 0%, 100% { transform: none; } 50% { transform: scale3d(1.1, 1.1, 1); } }
+    </style>
+</head>
+<body class="bg-gradient flex items-center justify-center min-h-screen p-4">
+    
+    <div class="glass-container p-8 md:p-12 rounded-3xl max-w-lg w-full text-center animate__animated animate__zoomIn">
+        <!-- Animated Checkmark -->
+        <div class="mb-6">
+            <svg class="checkmark animate__animated animate__bounceIn" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+        </div>
+
+        <h1 class="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+            Pendaftaran Berhasil!
+        </h1>
+        
+        <p class="text-gray-400 mb-8 animate__animated animate__fadeInUp animate__delay-1s">
+            Terima kasih telah berpartisipasi dalam Content Creator Challenge Ramadhan 1446H. Karya kamu sudah masuk ke sistem kami!
+        </p>
+
+        <div class="space-y-4 animate__animated animate__fadeInUp animate__delay-2s">
+            <a href="index.html" class="block w-full py-4 bg-blue-600 hover:bg-blue-500 rounded-2xl font-bold transition duration-300 shadow-lg shadow-blue-900/40">
+                Kembali ke Beranda
+            </a>
+            <p class="text-xs text-gray-500">
+                Pemenang akan diumumkan melalui akun resmi Instagram OSIS Medikacom.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Efek Confetti saat halaman dimuat
+        window.onload = () => {
+            const duration = 3 * 1000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+            function randomInRange(min, max) {
+              return Math.random() * (max - min) + min;
+            }
+
+            const interval = setInterval(function() {
+              const timeLeft = animationEnd - Date.now();
+
+              if (timeLeft <= 0) {
+                return clearInterval(interval);
+              }
+
+              const particleCount = 50 * (timeLeft / duration);
+              confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+              confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        };
+    </script>
+</body>
+</html>

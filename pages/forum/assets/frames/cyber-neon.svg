@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="neonGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe" />
+      <stop offset="50%" stop-color="#4facfe" />
+      <stop offset="100%" stop-color="#9b51e0" />
+    </linearGradient>
+    <filter id="glowFilter" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <!-- Outer Glow Ring -->
+  <circle cx="256" cy="256" r="236" fill="none" stroke="url(#neonGlow)" stroke-width="14" filter="url(#glowFilter)" stroke-dasharray="80 30 120 40" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="236" fill="none" stroke="#ffffff" stroke-width="3" stroke-dasharray="10 40 20 60" opacity="0.8"/>
+  <circle cx="256" cy="256" r="220" fill="none" stroke="#00f2fe" stroke-width="2" opacity="0.6"/>
+  <!-- Tech Accent Corners -->
+  <path d="M 70 120 L 70 70 L 120 70" fill="none" stroke="#00f2fe" stroke-width="6" stroke-linecap="round"/>
+  <path d="M 442 120 L 442 70 L 392 70" fill="none" stroke="#9b51e0" stroke-width="6" stroke-linecap="round"/>
+  <path d="M 70 392 L 70 442 L 120 442" fill="none" stroke="#4facfe" stroke-width="6" stroke-linecap="round"/>
+  <path d="M 442 392 L 442 442 L 392 442" fill="none" stroke="#00f2fe" stroke-width="6" stroke-linecap="round"/>
+  <!-- Cyber Nodes -->
+  <circle cx="70" cy="70" r="8" fill="#00f2fe" filter="url(#glowFilter)"/>
+  <circle cx="442" cy="70" r="8" fill="#9b51e0" filter="url(#glowFilter)"/>
+  <circle cx="70" cy="442" r="8" fill="#4facfe" filter="url(#glowFilter)"/>
+  <circle cx="442" cy="442" r="8" fill="#00f2fe" filter="url(#glowFilter)"/>
+  <!-- Bottom Micro Badge -->
+  <rect x="216" y="468" width="80" height="20" rx="10" fill="#0b1021" stroke="#00f2fe" stroke-width="2"/>
+  <text x="256" y="482" fill="#00f2fe" font-size="10" font-family="sans-serif" font-weight="bold" text-anchor="middle" letter-spacing="2">CYBER</text>
+</svg>

@@ -1,0 +1,152 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Prismatic Rainbow Divine Gradients -->
+    <linearGradient id="divineGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fffbeb" />
+      <stop offset="25%" stop-color="#fde047" />
+      <stop offset="50%" stop-color="#f59e0b" />
+      <stop offset="75%" stop-color="#d97706" />
+      <stop offset="100%" stop-color="#78350f" />
+    </linearGradient>
+
+    <linearGradient id="prismaticGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f43f5e" />
+      <stop offset="20%" stop-color="#fb923c" />
+      <stop offset="40%" stop-color="#facc15" />
+      <stop offset="60%" stop-color="#4ade80" />
+      <stop offset="80%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#c084fc" />
+    </linearGradient>
+
+    <linearGradient id="gemGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="50%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#6366f1" />
+    </linearGradient>
+
+    <!-- Divine Glow Filters -->
+    <filter id="godGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="10" result="blur1" />
+      <feGaussianBlur stdDeviation="4" result="blur2" />
+      <feMerge>
+        <feMergeNode in="blur1" />
+        <feMergeNode in="blur2" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="auraGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="16" result="bigBlur" />
+      <feMerge>
+        <feMergeNode in="bigBlur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <style>
+      @keyframes spinClockwise {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      @keyframes spinCounter {
+        from { transform: rotate(360deg); }
+        to { transform: rotate(0deg); }
+      }
+      @keyframes divinePulse {
+        0% { opacity: 0.65; transform: scale(0.985); }
+        50% { opacity: 1; transform: scale(1.02); filter: drop-shadow(0 0 16px rgba(250, 204, 21, 0.8)); }
+        100% { opacity: 0.65; transform: scale(0.985); }
+      }
+      @keyframes gemSparkle {
+        0%, 100% { transform: scale(1); opacity: 0.8; }
+        50% { transform: scale(1.35); opacity: 1; filter: drop-shadow(0 0 14px #ffffff); }
+      }
+      @keyframes raySweep {
+        0% { stroke-dashoffset: 0; }
+        100% { stroke-dashoffset: 200; }
+      }
+
+      .spin-cw {
+        transform-origin: 256px 256px;
+        animation: spinClockwise 12s linear infinite;
+      }
+      .spin-fast {
+        transform-origin: 256px 256px;
+        animation: spinClockwise 6s linear infinite;
+      }
+      .spin-ccw {
+        transform-origin: 256px 256px;
+        animation: spinCounter 16s linear infinite;
+      }
+      .pulse-aura {
+        transform-origin: 256px 256px;
+        animation: divinePulse 3.5s ease-in-out infinite;
+      }
+      .sparkle {
+        transform-origin: center;
+        animation: gemSparkle 2s ease-in-out infinite;
+      }
+    </style>
+  </defs>
+
+  <!-- Layer 1: Divine Pulsing Outer Aura -->
+  <g class="pulse-aura" filter="url(#auraGlow)">
+    <circle cx="256" cy="256" r="238" fill="none" stroke="url(#prismaticGrad)" stroke-width="6" opacity="0.8" />
+  </g>
+
+  <!-- Layer 2: Rotating Sacred Constellation Runes (Clockwise) -->
+  <g class="spin-cw" opacity="0.9" filter="url(#godGlow)">
+    <circle cx="256" cy="256" r="234" fill="none" stroke="url(#divineGold)" stroke-width="4" stroke-dasharray="14 18 36 18" stroke-linecap="round"/>
+    <!-- Orbiting Orbs around the perimeter -->
+    <circle cx="256" cy="22" r="7" fill="#fde047" stroke="#ffffff" stroke-width="2"/>
+    <circle cx="490" cy="256" r="7" fill="#38bdf8" stroke="#ffffff" stroke-width="2"/>
+    <circle cx="256" cy="490" r="7" fill="#ec4899" stroke="#ffffff" stroke-width="2"/>
+    <circle cx="22" cy="256" r="7" fill="#a855f7" stroke="#ffffff" stroke-width="2"/>
+  </g>
+
+  <!-- Layer 3: Counter-Rotating Geometric Star Ring (Counter-Clockwise) -->
+  <g class="spin-ccw" opacity="0.85" filter="url(#godGlow)">
+    <circle cx="256" cy="256" r="222" fill="none" stroke="#fef08a" stroke-width="2.5" stroke-dasharray="6 30 18 30" />
+    <!-- 8 Prismatic Star Crystals in orbit -->
+    <polygon points="256,36 260,44 268,44 262,50 264,58 256,54 248,58 250,50 244,44 252,44" fill="#ffffff" />
+    <polygon points="412,100 416,108 424,108 418,114 420,122 412,118 404,122 406,114 400,108 408,108" fill="#fde047" />
+    <polygon points="476,256 480,264 488,264 482,270 484,278 476,274 468,278 470,270 464,264 472,264" fill="#38bdf8" />
+    <polygon points="412,412 416,420 424,420 418,426 420,434 412,430 404,434 406,426 400,420 408,420" fill="#c084fc" />
+    <polygon points="256,476 260,484 268,484 262,490 264,498 256,494 248,498 250,490 244,484 252,484" fill="#f43f5e" />
+    <polygon points="100,412 104,420 112,420 106,426 108,434 100,430 92,434 94,426 88,420 96,420" fill="#fb923c" />
+    <polygon points="36,256 40,264 48,264 42,270 44,278 36,274 28,278 30,270 24,264 32,264" fill="#4ade80" />
+    <polygon points="100,100 104,108 112,108 106,114 108,122 100,118 92,122 94,114 88,108 96,108" fill="#fde047" />
+  </g>
+
+  <!-- Layer 4: Static Inner Gold Boundary Ring -->
+  <circle cx="256" cy="256" r="226" fill="none" stroke="url(#divineGold)" stroke-width="7" filter="url(#godGlow)"/>
+  <circle cx="256" cy="256" r="220" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.9" />
+
+  <!-- Layer 5: Top Divine Sovereign Crown with Floating Shimmering Gem -->
+  <g transform="translate(256, 32)">
+    <!-- Crown Body -->
+    <path d="M -45 18 L -55 -18 L -20 0 L 0 -36 L 20 0 L 55 -18 L 45 18 Z" fill="url(#divineGold)" stroke="#fffbeb" stroke-width="2.5" filter="url(#godGlow)"/>
+    <!-- Diamond Base Jewels -->
+    <circle cx="-55" cy="-18" r="5" fill="#f43f5e" stroke="#fff" stroke-width="1.5"/>
+    <circle cx="55" cy="-18" r="5" fill="#f43f5e" stroke="#fff" stroke-width="1.5"/>
+    <!-- Central Floating Diamond Gem (Animated Sparkle) -->
+    <g class="sparkle" transform="translate(0, -36)">
+      <polygon points="0,-16 14,0 0,16 -14,0" fill="url(#gemGrad)" stroke="#ffffff" stroke-width="2" filter="url(#godGlow)"/>
+      <polygon points="0,-10 9,0 0,10 -9,0" fill="#ffffff" opacity="0.9"/>
+    </g>
+    <!-- Wing extensions -->
+    <path d="M -45 18 Q -75 0 -85 24 Q -65 24 -45 18 Z" fill="url(#divineGold)" stroke="#fff" stroke-width="1" filter="url(#godGlow)"/>
+    <path d="M 45 18 Q 75 0 85 24 Q 65 24 45 18 Z" fill="url(#divineGold)" stroke="#fff" stroke-width="1" filter="url(#godGlow)"/>
+  </g>
+
+  <!-- Layer 6: Bottom Sovereign Crest "INFINITY 10K" -->
+  <g transform="translate(256, 472)" filter="url(#godGlow)">
+    <!-- Golden Winged Plaque -->
+    <path d="M -85 -10 L -65 -16 L 65 -16 L 85 -10 L 75 14 L 0 20 L -75 14 Z" fill="#090d1f" stroke="url(#divineGold)" stroke-width="3" />
+    <path d="M -60 -12 L 60 -12 L 55 12 L 0 16 L -55 12 Z" fill="url(#divineGold)" opacity="0.25" />
+    <!-- Crest Title -->
+    <text x="0" y="4" fill="url(#divineGold)" font-size="12" font-family="'Plus Jakarta Sans', sans-serif" font-weight="900" text-anchor="middle" letter-spacing="3" stroke="#000000" stroke-width="0.5">
+      ★ INFINITY ★
+    </text>
+  </g>
+</svg>
