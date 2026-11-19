@@ -149,7 +149,7 @@ Buka browser favoritmu dan arahkan ke `http://localhost:8000`.
 <div align="center">
   <br />
   <h3><b>Tjiani</b></h3>
-  <p><b>Ghani Tjiani — Teknik Komputer dan Jaringan (TKJ XII-A)</b></p>
+  <p><b>Ghani — Teknik Komputer dan Jaringan (TKJ XII-A)</b></p>
   <p><i>Developer, Backend Enthusiast & Server Geek who prefers to be called <b>Tjiani</b>.</i></p>
 
   <a href="https://instagram.com/TJiani101" target="_blank">
